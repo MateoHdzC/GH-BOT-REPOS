@@ -95,9 +95,9 @@ class ModalAddProject(ctk.CTkToplevel):
             height=34,
             corner_radius=6,
             border_width=0,
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_MAIN,
-            hover_color=Theme.BG_CARD_HOVER,
+            hover_color=Theme.BTN_SECONDARY_HOVER,
             command=self._on_browse,
         )
         browse_btn.pack(side="right")
@@ -261,10 +261,10 @@ class ModalAddProject(ctk.CTkToplevel):
         cancel_btn = ctk.CTkButton(
             btn_row,
             text="Cancelar",
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_MAIN,
-            hover_color=Theme.BG_CARD_HOVER,
-            text_color=Theme.TEXT_SECONDARY,
+            hover_color=Theme.BTN_SECONDARY_HOVER,
+            text_color=Theme.TEXT_PRIMARY,
             height=36,
             width=100,
             corner_radius=6,

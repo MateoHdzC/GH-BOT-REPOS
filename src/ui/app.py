@@ -146,9 +146,9 @@ class MainApplication(ctk.CTk):
         self.sync_all_btn = ctk.CTkButton(
             self.top_bar,
             text="⚡ Subir Todos",
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_MAIN,
-            hover_color=Theme.BG_CARD_HOVER,
+            hover_color=Theme.BTN_SECONDARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12),
             height=34,

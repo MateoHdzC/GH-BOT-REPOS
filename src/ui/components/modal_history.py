@@ -101,9 +101,9 @@ class ModalProjectHistory(ctk.CTkToplevel):
         close_btn = ctk.CTkButton(
             self,
             text="Cerrar",
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.PRIMARY,
             bg_color=Theme.BG_MAIN,
-            hover_color=Theme.BG_CARD_HOVER,
+            hover_color=Theme.PRIMARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             corner_radius=6,
             border_width=0,

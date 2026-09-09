@@ -136,9 +136,9 @@ class ProjectCard(ctk.CTkFrame):
         history_btn = ctk.CTkButton(
             action_frame,
             text="Historial",
-            fg_color=Theme.BG_INPUT,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_CARD,
-            hover_color=Theme.BG_CARD_HOVER,
+            hover_color=Theme.BTN_SECONDARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=70,
