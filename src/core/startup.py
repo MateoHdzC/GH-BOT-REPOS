@@ -1,4 +1,3 @@
-"""Windows Startup registry integration (HKCU Run key)."""
 
 from __future__ import annotations
 
@@ -12,26 +11,20 @@ from src.utils.logger import log_event
 REG_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 APP_REG_NAME = "GH-BOT-REPOS"
 
-
 class WindowsStartup:
-    """Manages auto-start on Windows user login without requiring administrator rights."""
 
     @staticmethod
     def get_executable_command() -> str:
-        """Construct the launch command for startup."""
         if getattr(sys, "frozen", False):
-            # Running as bundled PyInstaller exe
             exe_path = sys.executable
             return f'"{exe_path}" --tray'
         else:
-            # Running as Python script
             python_exe = sys.executable
             main_script = Path(__file__).resolve().parent.parent.parent / "main.py"
             return f'"{python_exe}" "{main_script}" --tray'
 
     @classmethod
     def is_startup_enabled(cls) -> bool:
-        """Check if registry entry exists in HKCU."""
         if os.name != "nt":
             return False
         try:
@@ -46,7 +39,6 @@ class WindowsStartup:
 
     @classmethod
     def enable_startup(cls) -> bool:
-        """Register application to start automatically with Windows."""
         if os.name != "nt":
             return False
         try:
@@ -61,7 +53,6 @@ class WindowsStartup:
 
     @classmethod
     def disable_startup(cls) -> bool:
-        """Unregister application from Windows startup."""
         if os.name != "nt":
             return False
         try:

@@ -1,4 +1,3 @@
-"""Safety Guard: Pre-commit risk analysis and large change detection."""
 
 from __future__ import annotations
 
@@ -10,7 +9,6 @@ from typing import List
 from src.git.manager import GitStatusInfo
 from src.utils.logger import log_event
 
-# High-risk file patterns
 DANGEROUS_FILE_PATTERNS = [
     re.compile(r"^\.env(\..+)?$", re.IGNORECASE),
     re.compile(r".*\.pem$", re.IGNORECASE),
@@ -20,10 +18,8 @@ DANGEROUS_FILE_PATTERNS = [
     re.compile(r".*service[-_]account.*\.json$", re.IGNORECASE),
 ]
 
-
 @dataclass
 class SafetyCheckResult:
-    """Outcome of safety guard inspection."""
     passed: bool
     warning: bool = False
     message: str = ""
@@ -31,9 +27,7 @@ class SafetyCheckResult:
     deletions_count: int = 0
     dangerous_files: List[str] = field(default_factory=list)
 
-
 class SafetyGuard:
-    """Verifies changes before committing to avoid leaking secrets or destructive commits."""
 
     def __init__(
         self,
@@ -46,7 +40,6 @@ class SafetyGuard:
         self.max_deleted_lines = max_deleted_lines
 
     def evaluate(self, status: GitStatusInfo) -> SafetyCheckResult:
-        """Inspect status before commit."""
         if not self.enabled:
             return SafetyCheckResult(passed=True, message="Safety guard is disabled")
 
@@ -60,7 +53,6 @@ class SafetyGuard:
                     dangerous.append(file_path)
                     break
 
-        # 1. Critical secret/key detection
         if dangerous:
             msg = f"Potential secret or sensitive file detected: {', '.join(dangerous)}"
             log_event("SECURITY", f"Commit blocked! {msg}")
@@ -73,7 +65,6 @@ class SafetyGuard:
                 dangerous_files=dangerous,
             )
 
-        # 2. Large changes threshold detection
         is_large_files = status.total_changed_files > self.max_changed_files
         is_large_deletions = status.deleted_lines_est > self.max_deleted_lines
 

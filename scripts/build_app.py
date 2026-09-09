@@ -1,11 +1,9 @@
-"""Build script for packaging GH-BOT-REPOS as a standalone Windows application."""
 
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-
 
 def build():
     root_dir = Path(__file__).resolve().parent.parent
@@ -16,7 +14,6 @@ def build():
     print("GH-BOT-REPOS — GENERADOR DE EJECUTABLE WINDOWS")
     print("=" * 60)
 
-    # PyInstaller arguments
     cmd = [
         sys.executable,
         "-m",
@@ -52,7 +49,6 @@ def build():
         print(f"ERROR EN LA COMPILACIÓN: Código de salida {res.returncode}")
         print("=" * 60)
         sys.exit(res.returncode)
-
 
 if __name__ == "__main__":
     build()

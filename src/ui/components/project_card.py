@@ -1,4 +1,3 @@
-"""ProjectCard: Interactive UI card for a monitored Git repository."""
 
 from __future__ import annotations
 
@@ -9,9 +8,7 @@ from src.config.models import ProjectMode, ProjectStatus
 from src.core.project_manager import ProjectManager
 from src.ui.theme import Theme
 
-
 class ProjectCard(ctk.CTkFrame):
-    """Component representing an individual project with controls and status."""
 
     def __init__(
         self,
@@ -43,7 +40,6 @@ class ProjectCard(ctk.CTkFrame):
     def _build_ui(self) -> None:
         cfg = self.manager.config
 
-        # 1. Header Frame: Project Name & Status Badge
         header_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         header_frame.pack(fill="x", padx=18, pady=(15, 8))
 
@@ -55,7 +51,6 @@ class ProjectCard(ctk.CTkFrame):
         )
         name_label.pack(side="left")
 
-        # Status badge indicator
         self.status_badge = ctk.CTkLabel(
             header_frame,
             text=f"● {self.manager.status.value}",
@@ -64,32 +59,24 @@ class ProjectCard(ctk.CTkFrame):
         )
         self.status_badge.pack(side="right")
 
-        # 2. Details Grid (Path, Branch, Remote, Last commit, Last sync)
         grid_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         grid_frame.pack(fill="x", padx=18, pady=5)
         grid_frame.columnconfigure(1, weight=1)
 
-        # Path
         self._add_field(grid_frame, 0, "Path:", cfg.path, is_path=True)
-        # Branch
         self._add_field(grid_frame, 1, "Branch:", cfg.branch or "main")
-        # Remote
         remote_display = cfg.remote if cfg.remote else "Sin remote configurado"
         self._add_field(grid_frame, 2, "Remote:", remote_display)
-        # Last commit
         commit_display = cfg.last_commit_message or "Sin commits registrados"
         if cfg.last_commit_hash:
             commit_display = f"[{cfg.last_commit_hash}] {commit_display}"
         self.last_commit_lbl = self._add_field(grid_frame, 3, "Último commit:", commit_display)
-        # Last sync
         sync_display = cfg.last_sync_time or "Nunca"
         self.last_sync_lbl = self._add_field(grid_frame, 4, "Última sincronización:", sync_display)
 
-        # 3. Action Bar: Mode Selector & Buttons
         action_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         action_frame.pack(fill="x", padx=18, pady=(12, 16))
 
-        # Mode Selector
         mode_label = ctk.CTkLabel(
             action_frame,
             text="Modo:",
@@ -116,7 +103,6 @@ class ProjectCard(ctk.CTkFrame):
         self.mode_selector.set(cfg.mode.value)
         self.mode_selector.pack(side="left", padx=5)
 
-        # Right Action Buttons
         del_btn = ctk.CTkButton(
             action_frame,
             text="Eliminar",
@@ -197,7 +183,6 @@ class ProjectCard(ctk.CTkFrame):
             pass
 
     def refresh(self) -> None:
-        """Update live status and indicators on the card."""
         cfg = self.manager.config
         self.status_badge.configure(
             text=f"● {self.manager.status.value}",

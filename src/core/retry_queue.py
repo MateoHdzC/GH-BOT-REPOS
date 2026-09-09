@@ -1,4 +1,3 @@
-"""Retry queue for handling temporary push failures without duplicating commits."""
 
 from __future__ import annotations
 
@@ -9,10 +8,8 @@ from typing import Dict, List, Optional
 
 from src.utils.logger import log_event
 
-
 @dataclass
 class PendingPush:
-    """Represents a push operation waiting to be retried."""
     project_path: str
     project_name: str
     remote: str
@@ -23,9 +20,7 @@ class PendingPush:
     last_error: str = ""
     next_retry_time: float = 0.0
 
-
 class RetryQueue:
-    """Thread-safe queue that tracks and schedules failed push retries."""
 
     def __init__(self):
         self._lock = threading.Lock()
@@ -39,7 +34,6 @@ class RetryQueue:
         branch: str,
         error: str,
     ) -> PendingPush:
-        """Enqueue or update an item for retry."""
         with self._lock:
             now = time.time()
             existing = self._queue.get(project_path)
@@ -59,7 +53,7 @@ class RetryQueue:
                     attempts=1,
                     last_attempt_time=now,
                     last_error=error,
-                    next_retry_time=now + 30,  # First retry in 30 seconds
+                    next_retry_time=now + 30,
                 )
                 self._queue[project_path] = item
 
@@ -70,14 +64,12 @@ class RetryQueue:
             return item
 
     def remove(self, project_path: str) -> None:
-        """Remove a project from the retry queue upon successful push or cancellation."""
         with self._lock:
             if project_path in self._queue:
                 item = self._queue.pop(project_path)
                 log_event("PUSH", f"{item.project_name}: Removed from retry queue (successful).")
 
     def get_due_items(self) -> List[PendingPush]:
-        """Return items that are ready to be retried now."""
         with self._lock:
             now = time.time()
             return [

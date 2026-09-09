@@ -1,4 +1,3 @@
-"""Configuration manager for loading, persisting, and modifying project settings."""
 
 from __future__ import annotations
 
@@ -13,17 +12,13 @@ from typing import List, Optional
 from src.config.models import AppConfig, ProjectConfig, ProjectMode
 from src.utils.logger import log_event
 
-
 def get_default_config_path() -> Path:
-    """Resolve permanent local machine configuration path in Windows AppData."""
     appdata = os.environ.get("APPDATA")
     if appdata:
         return Path(appdata) / "GH-BOT-REPOS" / "projects.json"
     return Path.home() / ".gh_bot_repos" / "projects.json"
 
-
 class ConfigManager:
-    """Thread-safe manager for projects.json configuration."""
 
     def __init__(self, config_path: Optional[Path] = None):
         self._local_backup_path = (
@@ -46,10 +41,8 @@ class ConfigManager:
             return self._config
 
     def load(self) -> AppConfig:
-        """Load configuration from JSON file or create a default one."""
         with self._lock:
             if not self.config_path.exists():
-                # If AppData config doesn't exist yet but local workspace backup exists, migrate it
                 if self._is_default_path and self._local_backup_path.exists() and self._local_backup_path != self.config_path:
                     try:
                         self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,13 +68,11 @@ class ConfigManager:
             return self._config
 
     def save(self) -> bool:
-        """Persist configuration to disk atomically."""
         with self._lock:
             try:
                 self.config_path.parent.mkdir(parents=True, exist_ok=True)
                 data = self._config.to_dict()
 
-                # Atomic write via temporary file
                 tmp_fd, tmp_path = tempfile.mkstemp(
                     dir=self.config_path.parent,
                     prefix="projects_tmp_",
@@ -92,7 +83,6 @@ class ConfigManager:
 
                 shutil.move(tmp_path, self.config_path)
 
-                # Mirror backup to local repo directory if it exists
                 if self._is_default_path and self._local_backup_path.parent.exists() and self._local_backup_path != self.config_path:
                     try:
                         shutil.copy2(self.config_path, self._local_backup_path)

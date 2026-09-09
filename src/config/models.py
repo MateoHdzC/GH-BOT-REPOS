@@ -1,4 +1,3 @@
-"""Configuration models for GH-BOT-REPOS."""
 
 from __future__ import annotations
 
@@ -7,23 +6,18 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-
 class ProjectMode(str, Enum):
-    """Execution modes for a monitored project."""
     AUTO = "AUTO"
     COMMIT_ONLY = "COMMIT_ONLY"
     PAUSED = "PAUSED"
 
-
 class ProjectStatus(str, Enum):
-    """Operational status of a project."""
     WATCHING = "Watching"
     DEBOUNCING = "Debouncing"
     SYNCING = "Syncing"
     PAUSED = "Paused"
     ERROR = "Error"
     IDLE = "Idle"
-
 
 DEFAULT_EXCLUSIONS: List[str] = [
     ".git",
@@ -57,16 +51,14 @@ DEFAULT_EXCLUSIONS: List[str] = [
     ".pytest_cache/*",
 ]
 
-
 @dataclass
 class ProjectConfig:
-    """Configuration for an individual monitored project."""
     name: str
     path: str
     remote: str = ""
     branch: str = "main"
     mode: ProjectMode = ProjectMode.AUTO
-    debounce_seconds: int = 300  # Default: 5 minutes
+    debounce_seconds: int = 300
     enabled: bool = True
     dry_run: bool = False
     safety_guard_enabled: bool = True
@@ -74,7 +66,6 @@ class ProjectConfig:
     max_deleted_lines_threshold: int = 500
     custom_exclusions: List[str] = field(default_factory=list)
 
-    # Runtime and status fields (persisted or cached)
     last_sync_time: Optional[str] = None
     last_commit_hash: Optional[str] = None
     last_commit_message: Optional[str] = None
@@ -112,10 +103,8 @@ class ProjectConfig:
             last_error=data.get("last_error"),
         )
 
-
 @dataclass
 class AppConfig:
-    """Global configuration settings for GH-BOT-REPOS."""
     projects: List[ProjectConfig] = field(default_factory=list)
     start_with_windows: bool = True
     minimize_to_tray: bool = True

@@ -1,4 +1,3 @@
-"""Add Project modal dialog with Git validation and initialization support."""
 
 from __future__ import annotations
 
@@ -11,7 +10,6 @@ import customtkinter as ctk
 from src.config.models import ProjectConfig, ProjectMode
 from src.git.manager import GitManager
 from src.ui.theme import Theme
-
 
 DEBOUNCE_OPTIONS = {
     "1 minuto (60s)": 60,
@@ -26,9 +24,7 @@ DEBOUNCE_OPTIONS = {
     "24 horas": 86400,
 }
 
-
 class ModalAddProject(ctk.CTkToplevel):
-    """Modal window for configuring a new Git repository for monitoring."""
 
     def __init__(
         self,
@@ -50,7 +46,6 @@ class ModalAddProject(ctk.CTkToplevel):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        # Title
         title_lbl = ctk.CTkLabel(
             self,
             text="Configurar Nuevo Proyecto",
@@ -67,11 +62,9 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         desc_lbl.pack(anchor="w", padx=25, pady=(0, 15))
 
-        # Main scrollable container
         container = ctk.CTkScrollableFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         container.pack(fill="both", expand=True, padx=25, pady=5)
 
-        # 1. Folder Selection
         self._add_label(container, "Carpeta del Proyecto:")
         folder_row = ctk.CTkFrame(container, fg_color=Theme.BG_MAIN, corner_radius=0)
         folder_row.pack(fill="x", pady=(2, 8))
@@ -102,7 +95,6 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         browse_btn.pack(side="right")
 
-        # Git status / init alert box
         self.git_alert_frame = ctk.CTkFrame(
             container,
             fg_color=Theme.BG_CARD,
@@ -130,7 +122,6 @@ class ModalAddProject(ctk.CTkToplevel):
             command=self._on_init_git,
         )
 
-        # 2. Project Name
         self._add_label(container, "Nombre del Proyecto:")
         self.name_entry = ctk.CTkEntry(
             container,
@@ -144,7 +135,6 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         self.name_entry.pack(fill="x", pady=(2, 12))
 
-        # 3. Remote URL
         self._add_label(container, "Repositorio Remoto (GitHub URL):")
         self.remote_entry = ctk.CTkEntry(
             container,
@@ -158,13 +148,11 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         self.remote_entry.pack(fill="x", pady=(2, 12))
 
-        # 4. Branch & Mode Grid
         branch_mode_row = ctk.CTkFrame(container, fg_color=Theme.BG_MAIN, corner_radius=0)
         branch_mode_row.pack(fill="x", pady=5)
         branch_mode_row.columnconfigure(0, weight=1)
         branch_mode_row.columnconfigure(1, weight=1)
 
-        # Branch
         col0 = ctk.CTkFrame(branch_mode_row, fg_color=Theme.BG_MAIN, corner_radius=0)
         col0.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         self._add_label(col0, "Rama (Branch):")
@@ -181,7 +169,6 @@ class ModalAddProject(ctk.CTkToplevel):
         self.branch_entry.insert(0, "main")
         self.branch_entry.pack(fill="x", pady=(2, 0))
 
-        # Mode
         col1 = ctk.CTkFrame(branch_mode_row, fg_color=Theme.BG_MAIN, corner_radius=0)
         col1.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
         self._add_label(col1, "Modo de Sincronización:")
@@ -198,7 +185,6 @@ class ModalAddProject(ctk.CTkToplevel):
         self.mode_menu.set("AUTO")
         self.mode_menu.pack(fill="x", pady=(2, 0))
 
-        # 5. Debounce Selector
         self._add_label(container, "Tiempo de Espera (Debounce):")
         self.debounce_menu = ctk.CTkOptionMenu(
             container,
@@ -213,7 +199,6 @@ class ModalAddProject(ctk.CTkToplevel):
         self.debounce_menu.set("5 minutos (300s)")
         self.debounce_menu.pack(fill="x", pady=(2, 12))
 
-        # 6. Safety & Dry Run Toggles
         options_frame = ctk.CTkFrame(
             container,
             fg_color=Theme.BG_CARD,
@@ -245,7 +230,6 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         self.dry_run_chk.pack(anchor="w", padx=14, pady=(6, 12))
 
-        # Error notification label
         self.error_label = ctk.CTkLabel(
             container,
             text="",
@@ -254,7 +238,6 @@ class ModalAddProject(ctk.CTkToplevel):
         )
         self.error_label.pack(anchor="w", pady=5)
 
-        # Bottom Buttons
         btn_row = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         btn_row.pack(side="bottom", fill="x", padx=25, pady=20)
 
@@ -309,18 +292,15 @@ class ModalAddProject(ctk.CTkToplevel):
             self._inspect_directory(p)
 
     def _inspect_directory(self, path: Path) -> None:
-        """Verify Git repository state and auto-detect remote/branch."""
         if not self.git.is_repo(path):
             self.git_alert_lbl.configure(text="⚠ Esta carpeta todavía no es un repositorio Git.")
             self.init_git_btn.pack(side="right", padx=10, pady=6)
             self.git_alert_frame.pack(fill="x", pady=6)
         else:
             self.git_alert_frame.pack_forget()
-            # Detect branch
             branch = self.git.get_current_branch(path)
             self.branch_entry.delete(0, "end")
             self.branch_entry.insert(0, branch)
-            # Detect remote
             remote = self.git.get_remote_url(path)
             if remote:
                 self.remote_entry.delete(0, "end")
@@ -370,7 +350,6 @@ class ModalAddProject(ctk.CTkToplevel):
             )
             return
 
-        # If remote provided, configure it in Git if not already set
         if remote_str:
             self.git.set_or_add_remote(target_path, remote_str)
 

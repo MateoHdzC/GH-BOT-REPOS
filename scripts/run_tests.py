@@ -1,9 +1,7 @@
-"""Test runner script for GH-BOT-REPOS."""
 
 import sys
 import subprocess
 from pathlib import Path
-
 
 def main():
     root_dir = Path(__file__).resolve().parent.parent
@@ -24,7 +22,6 @@ def main():
         print("RESULTADO: FALLO — Se detectaron errores en las pruebas.")
         print("=" * 60)
         sys.exit(res.returncode)
-
 
 if __name__ == "__main__":
     main()

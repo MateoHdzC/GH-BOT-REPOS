@@ -1,4 +1,3 @@
-"""Sidebar navigation component for GH-BOT-REPOS."""
 
 from __future__ import annotations
 
@@ -6,9 +5,7 @@ import customtkinter as ctk
 from typing import Callable
 from src.ui.theme import Theme
 
-
 class Sidebar(ctk.CTkFrame):
-    """Sidebar navigation panel."""
 
     def __init__(
         self,
@@ -33,7 +30,6 @@ class Sidebar(ctk.CTkFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        # App Title
         title_frame = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         title_frame.pack(fill="x", padx=20, pady=(25, 20))
 
@@ -53,11 +49,9 @@ class Sidebar(ctk.CTkFrame):
         )
         sub_label.pack(anchor="w")
 
-        # Separator
         sep1 = ctk.CTkFrame(self, fg_color=Theme.BORDER, height=1, corner_radius=0, border_width=0)
         sep1.pack(fill="x", padx=15, pady=5)
 
-        # Navigation Links
         nav_container = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         nav_container.pack(fill="x", padx=10, pady=10)
 
@@ -68,14 +62,12 @@ class Sidebar(ctk.CTkFrame):
         self._create_nav_btn(nav_container, "logs", "📝 Actividad / Logs")
         self._create_nav_btn(nav_container, "configuracion", "⚙ Configuración")
 
-        # Bottom System Indicators & Exit
         bottom_frame = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         bottom_frame.pack(side="bottom", fill="x", padx=15, pady=20)
 
         sep2 = ctk.CTkFrame(bottom_frame, fg_color=Theme.BORDER, height=1, corner_radius=0, border_width=0)
         sep2.pack(fill="x", pady=(0, 15))
 
-        # GitHub Status
         self.github_status_lbl = ctk.CTkLabel(
             bottom_frame,
             text="GitHub: ○ Desconectado",
@@ -85,7 +77,6 @@ class Sidebar(ctk.CTkFrame):
         )
         self.github_status_lbl.pack(fill="x", pady=2)
 
-        # Engine Status
         self.engine_status_lbl = ctk.CTkLabel(
             bottom_frame,
             text="Engine: ● Running",
@@ -95,7 +86,6 @@ class Sidebar(ctk.CTkFrame):
         )
         self.engine_status_lbl.pack(fill="x", pady=2)
 
-        # Exit Button
         exit_btn = ctk.CTkButton(
             bottom_frame,
             text="Salir",
@@ -162,9 +152,7 @@ class Sidebar(ctk.CTkFrame):
                 )
         self.on_navigate(view_key)
 
-
     def update_counts(self, total: int, active: int, paused: int) -> None:
-        """Update navigation badge counters."""
         if "todos" in self._nav_buttons and self._nav_buttons["todos"]["badge"]:
             self._nav_buttons["todos"]["badge"].configure(text=str(total))
         if "activos" in self._nav_buttons and self._nav_buttons["activos"]["badge"]:
@@ -173,7 +161,6 @@ class Sidebar(ctk.CTkFrame):
             self._nav_buttons["pausados"]["badge"].configure(text=str(paused))
 
     def update_system_status(self, github_connected: bool, github_user: str = "", engine_running: bool = True) -> None:
-        """Update GitHub connection and engine indicator labels."""
         if github_connected:
             user_text = f" ({github_user})" if github_user else ""
             self.github_status_lbl.configure(text=f"GitHub: ● Conectado{user_text}", text_color=Theme.SUCCESS)

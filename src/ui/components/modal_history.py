@@ -1,4 +1,3 @@
-"""Modal history dialog displaying past synchronizations and commits for a project."""
 
 from __future__ import annotations
 
@@ -7,9 +6,7 @@ import customtkinter as ctk
 from src.core.project_manager import ProjectManager
 from src.ui.theme import Theme
 
-
 class ModalProjectHistory(ctk.CTkToplevel):
-    """Modal displaying chronological synchronization attempts and commit records."""
 
     def __init__(self, parent, manager: ProjectManager):
         super().__init__(parent)

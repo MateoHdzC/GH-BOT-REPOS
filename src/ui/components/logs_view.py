@@ -1,4 +1,3 @@
-"""Real-time log viewer component for GH-BOT-REPOS."""
 
 from __future__ import annotations
 
@@ -11,9 +10,7 @@ import customtkinter as ctk
 from src.ui.theme import Theme
 from src.utils.logger import get_ui_stream_handler
 
-
 class LogsView(ctk.CTkFrame):
-    """Component for monitoring live operational logs and events."""
 
     def __init__(self, master, log_file_path: Path, **kwargs):
         super().__init__(
@@ -31,7 +28,6 @@ class LogsView(ctk.CTkFrame):
         self._load_existing_logs()
 
     def _build_ui(self) -> None:
-        # Header & Controls
         header = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         header.pack(fill="x", padx=20, pady=(20, 10))
 
@@ -43,7 +39,6 @@ class LogsView(ctk.CTkFrame):
         )
         title.pack(side="left")
 
-        # Action Buttons
         open_btn = ctk.CTkButton(
             header,
             text="Abrir app.log",
@@ -76,7 +71,6 @@ class LogsView(ctk.CTkFrame):
         )
         clear_btn.pack(side="right", padx=6)
 
-        # Category Filter
         filter_box = ctk.CTkOptionMenu(
             header,
             values=[
@@ -103,7 +97,6 @@ class LogsView(ctk.CTkFrame):
         filter_box.set("TODOS")
         filter_box.pack(side="right", padx=6)
 
-        # Text Console
         self.text_box = ctk.CTkTextbox(
             self,
             fg_color=Theme.BG_CARD,
@@ -131,7 +124,6 @@ class LogsView(ctk.CTkFrame):
         if len(self._raw_logs) > 1000:
             self._raw_logs.pop(0)
 
-        # Check if matches current filter
         if self._filter_cat == "TODOS" or self._filter_cat in message:
             self.text_box.configure(state="normal")
             self.text_box.insert("end", message + "\n")

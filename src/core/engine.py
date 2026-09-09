@@ -1,4 +1,3 @@
-"""Core Engine: Orchestrates multi-project monitoring, retries, and background execution."""
 
 from __future__ import annotations
 
@@ -17,9 +16,7 @@ from src.utils.logger import log_event
 from src.watcher.filter import PathFilter
 from src.watcher.service import WatcherService
 
-
 class Engine:
-    """Central application engine coordinating watchers, projects, and sync cycles."""
 
     def __init__(
         self,
@@ -46,7 +43,6 @@ class Engine:
             return self._is_running
 
     def start(self) -> None:
-        """Initialize engine and start monitoring all configured projects."""
         with self._lock:
             if self._is_running:
                 return
@@ -55,13 +51,11 @@ class Engine:
             log_event("SYSTEM", "Engine starting up...")
             self._load_projects()
 
-            # Start background maintenance thread (retry queue processor)
             self._worker_thread = threading.Thread(target=self._maintenance_loop, daemon=True)
             self._worker_thread.start()
             log_event("SYSTEM", "Engine running successfully.")
 
     def stop(self) -> None:
-        """Stop all project watchers and background loops cleanly."""
         with self._lock:
             if not self._is_running:
                 return
@@ -78,7 +72,6 @@ class Engine:
             log_event("SYSTEM", "Engine stopped cleanly.")
 
     def _load_projects(self) -> None:
-        """Register and start watchers for all projects in configuration."""
         projects = self.config_manager.get_projects()
         for p in projects:
             self._register_project(p)
@@ -108,7 +101,6 @@ class Engine:
             pm.set_status(ProjectStatus.PAUSED)
 
     def add_project(self, project: ProjectConfig) -> bool:
-        """Add a project to config and launch watcher."""
         with self._lock:
             if self.config_manager.add_project(project):
                 self._register_project(project)
@@ -116,7 +108,6 @@ class Engine:
             return False
 
     def remove_project(self, path: str) -> bool:
-        """Remove a project from config and stop its watcher."""
         with self._lock:
             norm = str(Path(path).resolve())
             self.watcher.stop_watching(norm)
@@ -126,7 +117,6 @@ class Engine:
             return self.config_manager.remove_project(path)
 
     def set_project_mode(self, path: str, mode: ProjectMode) -> bool:
-        """Update project mode and adjust watcher accordingly."""
         with self._lock:
             norm = str(Path(path).resolve())
             if self.config_manager.set_project_mode(path, mode):
@@ -158,32 +148,27 @@ class Engine:
             return list(self._managers.values())
 
     def sync_project_now(self, path: str) -> None:
-        """Trigger immediate sync for a specific project."""
         pm = self.get_manager(path)
         if pm:
             threading.Thread(target=pm.sync_now, daemon=True).start()
 
     def sync_all_now(self) -> None:
-        """Trigger immediate sync for all active projects."""
         with self._lock:
             for pm in self._managers.values():
                 if pm.config.mode != ProjectMode.PAUSED and pm.config.enabled:
                     threading.Thread(target=pm.sync_now, daemon=True).start()
 
     def pause_all(self) -> None:
-        """Pause all projects."""
         with self._lock:
             for pm in self._managers.values():
                 self.set_project_mode(pm.config.path, ProjectMode.PAUSED)
 
     def resume_all(self) -> None:
-        """Resume all projects to AUTO."""
         with self._lock:
             for pm in self._managers.values():
                 self.set_project_mode(pm.config.path, ProjectMode.AUTO)
 
     def get_dashboard_stats(self) -> dict:
-        """Aggregate live statistics across all projects."""
         with self._lock:
             total = len(self._managers)
             active = sum(1 for m in self._managers.values() if m.config.mode != ProjectMode.PAUSED and m.config.enabled)
@@ -205,7 +190,6 @@ class Engine:
             }
 
     def _maintenance_loop(self) -> None:
-        """Background thread handling push retry queues."""
         while self._is_running:
             time.sleep(5)
             due_items = self.retry_queue.get_due_items()

@@ -1,4 +1,3 @@
-"""Thread-safe debouncing timer for Git synchronization triggers."""
 
 from __future__ import annotations
 
@@ -8,9 +7,7 @@ from typing import Callable, Optional
 
 from src.utils.logger import log_event
 
-
 class DebounceController:
-    """Manages a reset-capable countdown timer per project."""
 
     def __init__(
         self,
@@ -42,7 +39,6 @@ class DebounceController:
             return max(0, int(remaining))
 
     def notify_change(self) -> None:
-        """Register a filesystem change. Starts or restarts the debounce timer."""
         with self._lock:
             self._last_event_time = time.time()
             if self._timer and self._timer.is_alive():
@@ -57,7 +53,6 @@ class DebounceController:
             )
 
     def trigger_now(self) -> None:
-        """Cancel any running timer and invoke the synchronization callback immediately."""
         with self._lock:
             if self._timer and self._timer.is_alive():
                 self._timer.cancel()
@@ -67,19 +62,16 @@ class DebounceController:
         self._execute()
 
     def cancel(self) -> None:
-        """Cancel any scheduled debounce countdown."""
         with self._lock:
             if self._timer and self._timer.is_alive():
                 self._timer.cancel()
             self._timer = None
 
     def update_debounce_time(self, new_seconds: int) -> None:
-        """Update debounce interval."""
         with self._lock:
             self.debounce_seconds = max(1, new_seconds)
 
     def _execute(self) -> None:
-        """Trigger target action safely in a separate thread."""
         with self._lock:
             self._timer = None
 

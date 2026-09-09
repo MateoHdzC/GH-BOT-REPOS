@@ -1,4 +1,3 @@
-"""Windows System Tray integration using pystray."""
 
 from __future__ import annotations
 
@@ -14,9 +13,7 @@ from src.core.engine import Engine
 from src.utils.logger import log_event
 from src.utils.notifier import register_tray_icon
 
-
 class SystemTrayManager:
-    """Manages the Windows taskbar notification area (System Tray) icon and menu."""
 
     def __init__(
         self,
@@ -37,7 +34,6 @@ class SystemTrayManager:
         self._thread: Optional[threading.Thread] = None
 
     def start(self) -> None:
-        """Start system tray in a dedicated background thread."""
         if self._tray_icon is not None:
             return
 
@@ -64,7 +60,6 @@ class SystemTrayManager:
             self._tray_icon.run()
 
     def _create_menu(self) -> pystray.Menu:
-        """Build the dynamic contextual menu."""
         managers = self.engine.get_all_managers()
         project_items = []
         for pm in managers:
@@ -115,12 +110,10 @@ class SystemTrayManager:
         self.on_exit_app()
 
     def update_menu(self) -> None:
-        """Refresh the tray menu to reflect project status changes."""
         if self._tray_icon:
             self._tray_icon.menu = self._create_menu()
 
     def stop(self) -> None:
-        """Stop tray icon."""
         if self._tray_icon:
             try:
                 self._tray_icon.stop()

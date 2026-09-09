@@ -1,4 +1,3 @@
-"""Unit tests for configuration manager and models."""
 
 import tempfile
 from pathlib import Path
@@ -6,7 +5,6 @@ import pytest
 
 from src.config.manager import ConfigManager
 from src.config.models import AppConfig, ProjectConfig, ProjectMode, ProjectStatus
-
 
 def test_project_config_serialization():
     proj = ProjectConfig(
@@ -28,7 +26,6 @@ def test_project_config_serialization():
     assert deserialized.mode == ProjectMode.AUTO
     assert deserialized.debounce_seconds == 120
 
-
 def test_config_manager_crud():
     with tempfile.TemporaryDirectory() as tmpdir:
         config_path = Path(tmpdir) / "projects.json"
@@ -41,24 +38,19 @@ def test_config_manager_crud():
         assert mgr.add_project(p2) is True
         assert len(mgr.get_projects()) == 2
 
-        # Cannot add duplicate path
         assert mgr.add_project(p1) is False
 
-        # Get by path and by name
         fetched = mgr.get_project_by_name("p1")
         assert fetched is not None
         assert fetched.name == "P1"
 
-        # Update mode
         assert mgr.set_project_mode(p1.path, ProjectMode.PAUSED) is True
         assert mgr.get_project_by_path(p1.path).mode == ProjectMode.PAUSED
 
-        # Remove
         assert mgr.remove_project(p1.path) is True
         assert len(mgr.get_projects()) == 1
         assert mgr.get_project_by_path(p1.path) is None
 
-        # Verify persistence on disk
         mgr2 = ConfigManager(config_path)
         assert len(mgr2.get_projects()) == 1
         assert mgr2.get_projects()[0].name == "P2"

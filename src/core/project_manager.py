@@ -1,4 +1,3 @@
-"""ProjectManager: Manages the lifecycle, operations, and status of an individual project."""
 
 from __future__ import annotations
 
@@ -16,18 +15,14 @@ from src.git.manager import GitCommitInfo, GitErrorKind, GitManager, GitResult
 from src.utils.logger import log_event
 from src.watcher.debounce import DebounceController
 
-
 @dataclass
 class SyncHistoryEntry:
-    """Historical record of a synchronization attempt."""
     timestamp: str
     status: str
     detail: str
     commit_hash: Optional[str] = None
 
-
 class ProjectManager:
-    """Coordinates watcher, debouncer, git operations, and safety checks for a project."""
 
     def __init__(
         self,
@@ -66,13 +61,11 @@ class ProjectManager:
         )
 
     def set_status(self, new_status: ProjectStatus) -> None:
-        """Update operational status and notify listeners."""
         self.status = new_status
         if self.on_status_change:
             self.on_status_change(self.config.path, new_status)
 
     def handle_filesystem_change(self, event_type: str, file_path: str) -> None:
-        """Invoked by the watcher when a file change occurs."""
         if self.config.mode == ProjectMode.PAUSED or not self.config.enabled:
             return
 
@@ -80,16 +73,12 @@ class ProjectManager:
         self.debounce.notify_change()
 
     def _on_debounce_completed(self) -> None:
-        """Invoked when the debounce quiet window completes."""
         self.sync()
 
     def sync_now(self) -> None:
-        """⚡ Subir ahora: Trigger immediate sync ignoring debounce countdown."""
         self.debounce.trigger_now()
 
     def sync(self, dry_run: Optional[bool] = None) -> None:
-        """Execute synchronization cycle with concurrency safety."""
-        # Ensure only one sync runs on this repository at any given time
         if not self._op_lock.acquire(blocking=False):
             log_event("PROJECT", f"{self.config.name}: Sync already in progress, skipping.")
             return
@@ -111,7 +100,6 @@ class ProjectManager:
 
         self.set_status(ProjectStatus.SYNCING)
 
-        # 1. Check working tree status
         status = self.git.get_status(repo_path)
         if status.is_clean:
             log_event("GIT", f"{self.config.name}: No hay cambios para sincronizar.")
@@ -124,7 +112,6 @@ class ProjectManager:
         )
         self.stats["files_changed"] += status.total_changed_files
 
-        # 2. Safety Guard pre-commit check
         safety_res = self.safety_guard.evaluate(status)
         if not safety_res.passed:
             self.set_status(ProjectStatus.ERROR)
@@ -134,14 +121,12 @@ class ProjectManager:
             self._add_history("⚠ Bloqueado por Safety Guard", safety_res.message)
             return
 
-        # 3. Dry run mode handling
         if is_dry_run:
             log_event("SYSTEM", f"[DRY RUN] {self.config.name}: Would stage {status.total_changed_files} files, commit and push.")
             self._add_history("🔍 DRY RUN", f"Simulados {status.total_changed_files} cambios")
             self.set_status(ProjectStatus.WATCHING)
             return
 
-        # 4. Stage changes
         stage_res = self.git.stage_all(repo_path)
         if not stage_res.success:
             self.set_status(ProjectStatus.ERROR)
@@ -149,7 +134,6 @@ class ProjectManager:
             self._add_history("❌ Error al preparar cambios", stage_res.stderr)
             return
 
-        # 5. Commit
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         commit_msg = f"auto: sync {status.total_changed_files} files [{now_str}]"
         commit_res = self.git.commit(repo_path, commit_msg)
@@ -167,7 +151,6 @@ class ProjectManager:
         self.config.last_sync_time = now_str
         log_event("COMMIT", f"{self.config.name}: Commit created [{commit_hash}]")
 
-        # 6. Mode: COMMIT_ONLY vs AUTO
         if self.config.mode == ProjectMode.COMMIT_ONLY:
             log_event("PROJECT", f"{self.config.name}: Mode is COMMIT_ONLY, push skipped.")
             self._add_history("✓ Commit creado", commit_msg, commit_hash)
@@ -176,7 +159,6 @@ class ProjectManager:
                 self.on_notify("success", self.config.name, "Commit creado correctamente.")
             return
 
-        # 7. Push (AUTO Mode)
         token = GitHubCredentials.get_token()
         remote = self.config.remote or "origin"
         branch = self.config.branch or self.git.get_current_branch(repo_path)

@@ -1,4 +1,3 @@
-"""Watchdog filesystem monitoring service with per-project isolation."""
 
 from __future__ import annotations
 
@@ -20,9 +19,7 @@ from watchdog.observers import Observer
 from src.utils.logger import log_event
 from src.watcher.filter import PathFilter
 
-
 class ProjectEventHandler(FileSystemEventHandler):
-    """Event handler for a specific project directory."""
 
     def __init__(
         self,
@@ -38,7 +35,6 @@ class ProjectEventHandler(FileSystemEventHandler):
         self.filter = path_filter
 
     def _process_event(self, event_type: str, src_path: str, dest_path: Optional[str] = None) -> None:
-        # Check if source or destination should be ignored
         if self.filter.should_ignore(src_path, self.project_dir):
             return
         if dest_path and self.filter.should_ignore(dest_path, self.project_dir):
@@ -64,9 +60,7 @@ class ProjectEventHandler(FileSystemEventHandler):
         dest = getattr(event, "dest_path", None)
         self._process_event("MOVED", event.src_path, dest)
 
-
 class WatcherService:
-    """Manages active filesystem observers across multiple projects."""
 
     def __init__(self):
         self._observers: Dict[str, Observer] = {}
@@ -78,7 +72,6 @@ class WatcherService:
         on_change_callback: Callable[[str, str], None],
         path_filter: Optional[PathFilter] = None,
     ) -> bool:
-        """Start monitoring a project directory."""
         resolved = str(Path(project_path).resolve())
         if resolved in self._observers:
             log_event("WATCHER", f"Already watching: {project_name} ({resolved})")
@@ -112,7 +105,6 @@ class WatcherService:
             return False
 
     def stop_watching(self, project_path: str) -> bool:
-        """Stop monitoring a project directory."""
         resolved = str(Path(project_path).resolve())
         observer = self._observers.pop(resolved, None)
         if observer:
@@ -126,13 +118,11 @@ class WatcherService:
         return False
 
     def stop_all(self) -> None:
-        """Stop all active watchers cleanly."""
         paths = list(self._observers.keys())
         for path in paths:
             self.stop_watching(path)
 
     def is_watching(self, project_path: str) -> bool:
-        """Check if an observer is currently running for the path."""
         resolved = str(Path(project_path).resolve())
         obs = self._observers.get(resolved)
         return obs is not None and obs.is_alive()

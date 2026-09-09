@@ -1,4 +1,3 @@
-"""Windows Credential Manager integration for secure GitHub PAT storage."""
 
 from __future__ import annotations
 
@@ -14,13 +13,10 @@ SERVICE_NAME = "GH-BOT-REPOS-WINDOWS"
 CREDENTIAL_KEY = "github_pat"
 USER_KEY = "github_username"
 
-
 class GitHubCredentials:
-    """Manages GitHub tokens using the native OS secure store."""
 
     @staticmethod
     def store_token(token: str, username: str = "") -> bool:
-        """Store GitHub Personal Access Token securely in Windows Credential Manager."""
         clean_token = token.strip()
         if not clean_token:
             return False
@@ -36,7 +32,6 @@ class GitHubCredentials:
 
     @staticmethod
     def get_token() -> Optional[str]:
-        """Retrieve token from secure storage."""
         try:
             return keyring.get_password(SERVICE_NAME, CREDENTIAL_KEY)
         except Exception as ex:
@@ -45,7 +40,6 @@ class GitHubCredentials:
 
     @staticmethod
     def get_username() -> Optional[str]:
-        """Retrieve cached GitHub username from secure storage."""
         try:
             return keyring.get_password(SERVICE_NAME, USER_KEY)
         except Exception:
@@ -53,7 +47,6 @@ class GitHubCredentials:
 
     @staticmethod
     def delete_token() -> bool:
-        """Remove stored credentials from Windows Credential Manager."""
         try:
             keyring.delete_password(SERVICE_NAME, CREDENTIAL_KEY)
             try:
@@ -68,11 +61,6 @@ class GitHubCredentials:
 
     @classmethod
     def validate_token(cls, token: Optional[str] = None) -> Tuple[bool, Dict[str, str], str]:
-        """Validate token against GitHub REST API (https://api.github.com/user).
-
-        Returns:
-            (is_valid, user_info, error_message)
-        """
         tok = cls.get_token() if token is None else token.strip()
         if not tok:
             return False, {}, "No token configured"

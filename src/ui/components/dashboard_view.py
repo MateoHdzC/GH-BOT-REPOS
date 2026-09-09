@@ -1,4 +1,3 @@
-"""Dashboard view displaying live metrics, synchronization statistics, and system health."""
 
 from __future__ import annotations
 
@@ -7,9 +6,7 @@ from src.core.engine import Engine
 from src.git.credentials import GitHubCredentials
 from src.ui.theme import Theme
 
-
 class DashboardView(ctk.CTkScrollableFrame):
-    """Real-time statistical dashboard."""
 
     def __init__(self, master, engine: Engine, **kwargs):
         super().__init__(
@@ -23,7 +20,6 @@ class DashboardView(ctk.CTkScrollableFrame):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        # Title
         title_lbl = ctk.CTkLabel(
             self,
             text="Dashboard de Monitoreo",
@@ -40,7 +36,6 @@ class DashboardView(ctk.CTkScrollableFrame):
         )
         desc_lbl.pack(anchor="w", padx=20, pady=(0, 20))
 
-        # Metrics Grid (2 rows x 4 cols)
         metrics_grid = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         metrics_grid.pack(fill="x", padx=20, pady=5)
         for col in range(4):
@@ -56,7 +51,6 @@ class DashboardView(ctk.CTkScrollableFrame):
         self._create_stat_card(metrics_grid, 1, 2, "Pushes Fallidos", "0", Theme.ERROR)
         self._create_stat_card(metrics_grid, 1, 3, "Reintentos en Cola", "0", Theme.WARNING)
 
-        # System Details Section
         sys_lbl = ctk.CTkLabel(
             self,
             text="Diagnóstico del Sistema Windows",
@@ -135,7 +129,6 @@ class DashboardView(ctk.CTkScrollableFrame):
         val.pack(side="left")
 
     def refresh(self) -> None:
-        """Update metrics from engine stats."""
         stats = self.engine.get_dashboard_stats()
         queue_count = len(self.engine.retry_queue.get_all())
 

@@ -1,4 +1,3 @@
-"""Main Application Window for GH-BOT-REPOS using CustomTkinter."""
 
 from __future__ import annotations
 
@@ -28,16 +27,13 @@ from src.ui.tray import SystemTrayManager
 from src.utils.logger import log_event
 from src.utils.notifier import WindowsNotifier
 
-
 class MainApplication(ctk.CTk):
-    """Primary application frame and lifecycle controller."""
 
     def __init__(self, engine: Engine, config_manager: ConfigManager):
         super().__init__()
         self.engine = engine
         self.config_manager = config_manager
 
-        # Appearance configuration
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
 
@@ -46,7 +42,6 @@ class MainApplication(ctk.CTk):
         self.minsize(940, 620)
         self.configure(fg_color=Theme.BG_MAIN)
 
-        # Set Window Icon
         self.assets_dir = Path(__file__).resolve().parent.parent.parent / "assets"
         ico_path = self.assets_dir / "icon.ico"
         if ico_path.exists():
@@ -58,10 +53,8 @@ class MainApplication(ctk.CTk):
         self._active_view_key = "todos"
         self._project_cards: Dict[str, ProjectCard] = {}
 
-        # Intercept window close button (X) to minimize to System Tray
         self.protocol("WM_DELETE_WINDOW", self.on_close_to_tray)
 
-        # Setup System Tray
         self.tray = SystemTrayManager(
             engine=self.engine,
             on_show_window=self.show_window_from_tray,
@@ -71,38 +64,29 @@ class MainApplication(ctk.CTk):
 
         self._build_layout()
 
-        # Start Engine
         self.engine.start()
 
-        # Connect notifications dispatch
         self.engine.on_notify = self._dispatch_notification
 
-        # Apply Windows 11 Acrylic / Glass DWM effect
         if os.name == "nt":
             self.after(50, self._apply_windows_glass_effects)
-            # Ensure startup is configured if enabled in settings
             if self.config_manager.config.start_with_windows and not WindowsStartup.is_startup_enabled():
                 WindowsStartup.enable_startup()
 
-        # Periodic refresh cycle
         self.after(1000, self._periodic_ui_refresh)
 
     def _apply_windows_glass_effects(self) -> None:
-        """Enable native Windows 11 Dark Mode and ensure 100% solid opaque background."""
         try:
             import ctypes
             hwnd = ctypes.windll.user32.GetParent(self.winfo_id()) or self.winfo_id()
-            # DWMWA_USE_IMMERSIVE_DARK_MODE = 20
             dark = ctypes.c_int(1)
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(dark), ctypes.sizeof(dark))
-            # DWMWA_SYSTEMBACKDROP_TYPE = 38 (1 = DWMSBT_NONE, solid opaque background)
             backdrop = ctypes.c_int(1)
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 38, ctypes.byref(backdrop), ctypes.sizeof(backdrop))
         except Exception:
             pass
 
     def _build_layout(self) -> None:
-        # 1. Left Sidebar
         self.sidebar = Sidebar(
             self,
             on_navigate=self._on_navigate,
@@ -110,11 +94,9 @@ class MainApplication(ctk.CTk):
         )
         self.sidebar.pack(side="left", fill="y")
 
-        # 2. Main Container
         self.main_container = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.main_container.pack(side="right", fill="both", expand=True)
 
-        # Top Bar (Title + Action Buttons)
         self.top_bar = ctk.CTkFrame(self.main_container, fg_color=Theme.BG_MAIN, height=60, corner_radius=0)
         self.top_bar.pack(fill="x", padx=25, pady=(20, 10))
 
@@ -126,7 +108,6 @@ class MainApplication(ctk.CTk):
         )
         self.view_title_lbl.pack(side="left")
 
-        # Action Buttons on Top Bar
         self.add_btn = ctk.CTkButton(
             self.top_bar,
             text="+ Añadir Proyecto",
@@ -159,18 +140,15 @@ class MainApplication(ctk.CTk):
         )
         self.sync_all_btn.pack(side="right")
 
-        # Content Area
         self.content_frame = ctk.CTkFrame(self.main_container, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.content_frame.pack(fill="both", expand=True, padx=25, pady=(0, 20))
 
-        # 3. Views Initialization
         self.projects_scroll = ctk.CTkScrollableFrame(self.content_frame, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.dashboard_view = DashboardView(self.content_frame, self.engine)
         logs_path = Path(__file__).resolve().parent.parent.parent / "logs" / "app.log"
         self.logs_view = LogsView(self.content_frame, logs_path)
         self.settings_view = SettingsView(self.content_frame, on_auth_changed=self._on_auth_changed)
 
-        # Initially display projects list
         self._switch_view("todos")
         self._render_project_cards()
         self._update_sidebar_stats()
@@ -181,13 +159,11 @@ class MainApplication(ctk.CTk):
     def _switch_view(self, view_key: str) -> None:
         self._active_view_key = view_key
 
-        # Hide all views
         self.projects_scroll.pack_forget()
         self.dashboard_view.pack_forget()
         self.logs_view.pack_forget()
         self.settings_view.pack_forget()
 
-        # Update Top Bar visibility & title
         if view_key in ("todos", "activos", "pausados"):
             self.top_bar.pack(fill="x", padx=25, pady=(20, 10))
             self.add_btn.pack(side="right", padx=(10, 0))
@@ -217,14 +193,12 @@ class MainApplication(ctk.CTk):
             self.settings_view.pack(fill="both", expand=True)
 
     def _render_project_cards(self) -> None:
-        # Clear existing card widgets
         for widget in self.projects_scroll.winfo_children():
             widget.destroy()
         self._project_cards.clear()
 
         managers = self.engine.get_all_managers()
 
-        # Filter by selected tab
         if self._active_view_key == "activos":
             filtered = [m for m in managers if m.config.mode != ProjectMode.PAUSED and m.config.enabled]
         elif self._active_view_key == "pausados":
@@ -306,7 +280,6 @@ class MainApplication(ctk.CTk):
         self._update_sidebar_stats()
 
     def _periodic_ui_refresh(self) -> None:
-        """Periodic background refresh for cards and stats."""
         for card in self._project_cards.values():
             card.refresh()
         self._update_sidebar_stats()
@@ -319,7 +292,6 @@ class MainApplication(ctk.CTk):
             active=stats["active_projects"],
             paused=stats["paused_projects"],
         )
-        # GitHub Status
         token = GitHubCredentials.get_token()
         username = GitHubCredentials.get_username() or ""
         self.sidebar.update_system_status(
@@ -332,7 +304,6 @@ class MainApplication(ctk.CTk):
         WindowsNotifier.notify(title, message, level)
 
     def on_close_to_tray(self) -> None:
-        """Minimize window to System Tray instead of terminating the engine."""
         self.withdraw()
         WindowsNotifier.notify(
             "Segundo Plano",
@@ -341,7 +312,6 @@ class MainApplication(ctk.CTk):
         )
 
     def show_window_from_tray(self) -> None:
-        """Restore window from System Tray."""
         self.after(0, self._restore_window)
 
     def _restore_window(self) -> None:
@@ -350,7 +320,6 @@ class MainApplication(ctk.CTk):
         self.focus_force()
 
     def quit_app(self) -> None:
-        """Cleanly terminate the application and all background processes."""
         log_event("SYSTEM", "User requested application shutdown.")
         self.tray.stop()
         self.engine.stop()

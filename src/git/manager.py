@@ -1,10 +1,3 @@
-"""GitManager: High-reliability Git operations wrapper via subprocess.
-
-Strict safety guarantees:
-- Never executes `git push --force`
-- Never executes `git reset --hard`
-- Never deletes any repository or tracked files
-"""
 
 from __future__ import annotations
 
@@ -18,7 +11,6 @@ from typing import Dict, List, Optional, Tuple
 
 from src.utils.logger import log_event
 
-
 class GitErrorKind(str, Enum):
     NONE = "NONE"
     NOT_A_REPO = "NOT_A_REPO"
@@ -31,20 +23,16 @@ class GitErrorKind(str, Enum):
     LOCK_EXIST = "LOCK_EXIST"
     UNKNOWN = "UNKNOWN"
 
-
 @dataclass
 class GitResult:
-    """Standardized result of a git command execution."""
     success: bool
     stdout: str
     stderr: str
     returncode: int
     error_kind: GitErrorKind = GitErrorKind.NONE
 
-
 @dataclass
 class GitStatusInfo:
-    """Structured representation of repository working tree status."""
     is_clean: bool
     staged_files: List[str]
     unstaged_files: List[str]
@@ -52,19 +40,15 @@ class GitStatusInfo:
     total_changed_files: int
     deleted_lines_est: int = 0
 
-
 @dataclass
 class GitCommitInfo:
-    """Details about a git commit."""
     hash: str
     short_hash: str
     author: str
     date: str
     message: str
 
-
 class GitManager:
-    """Executes git commands safely and parses responses."""
 
     def __init__(self, git_binary: str = "git"):
         self.git_binary = git_binary
@@ -76,8 +60,6 @@ class GitManager:
         timeout: int = 45,
         env: Optional[Dict[str, str]] = None,
     ) -> GitResult:
-        """Execute a git command with timeout and safety checks."""
-        # Enforce safety guards: forbid dangerous commands
         forbidden = [
             ("--force", "Force push forbidden"),
             ("-f", "Force flag forbidden"),
@@ -107,7 +89,6 @@ class GitManager:
 
         cmd = [self.git_binary] + args
         cmd_env = os.environ.copy()
-        # Non-interactive git prompts to prevent hanging
         cmd_env["GIT_TERMINAL_PROMPT"] = "0"
         if env:
             cmd_env.update(env)
@@ -160,7 +141,6 @@ class GitManager:
             )
 
     def _classify_error(self, code: int, stderr: str, stdout: str) -> GitErrorKind:
-        """Classify git errors into actionable domain types."""
         if code == 0:
             return GitErrorKind.NONE
         combined = f"{stderr} {stdout}".lower()
@@ -183,15 +163,12 @@ class GitManager:
         return GitErrorKind.UNKNOWN
 
     def is_repo(self, path: Path | str) -> bool:
-        """Check if target folder is a valid git repository."""
         res = self.run_command(path, ["rev-parse", "--is-inside-work-tree"])
         return res.success and res.stdout.strip() == "true"
 
     def init_repo(self, path: Path | str, initial_branch: str = "main") -> GitResult:
-        """Initialize a new git repository in the directory."""
         res = self.run_command(path, ["init", "-b", initial_branch])
         if not res.success:
-            # Fallback for older git versions that do not support -b in init
             res = self.run_command(path, ["init"])
             if res.success:
                 self.run_command(path, ["checkout", "-b", initial_branch])
@@ -200,32 +177,27 @@ class GitManager:
         return res
 
     def get_current_branch(self, path: Path | str) -> str:
-        """Get the current branch name, falling back to 'main'."""
         res = self.run_command(path, ["branch", "--show-current"])
         if res.success and res.stdout:
             return res.stdout.strip()
-        # If in detached HEAD or freshly initialized with no commits:
         res2 = self.run_command(path, ["symbolic-ref", "--short", "HEAD"])
         if res2.success and res2.stdout:
             return res2.stdout.strip()
         return "main"
 
     def get_remote_url(self, path: Path | str, remote: str = "origin") -> Optional[str]:
-        """Get URL for configured remote."""
         res = self.run_command(path, ["remote", "get-url", remote])
         if res.success and res.stdout:
             return res.stdout.strip()
         return None
 
     def set_or_add_remote(self, path: Path | str, remote_url: str, remote: str = "origin") -> GitResult:
-        """Set or create the remote URL."""
         existing = self.get_remote_url(path, remote)
         if existing:
             return self.run_command(path, ["remote", "set-url", remote, remote_url])
         return self.run_command(path, ["remote", "add", remote, remote_url])
 
     def get_status(self, path: Path | str) -> GitStatusInfo:
-        """Parse git status --porcelain=v1 to get exact changes."""
         res = self.run_command(path, ["status", "--porcelain=v1"])
         if not res.success:
             return GitStatusInfo(
@@ -256,7 +228,6 @@ class GitManager:
 
         all_unique = set(staged + unstaged + untracked)
 
-        # Estimate deleted lines if any for safety check
         deleted_lines = 0
         diff_stat = self.run_command(path, ["diff", "--numstat"])
         if diff_stat.success and diff_stat.stdout:
@@ -275,11 +246,9 @@ class GitManager:
         )
 
     def stage_all(self, path: Path | str) -> GitResult:
-        """Stage all modified, added, and deleted files."""
         return self.run_command(path, ["add", "-A"])
 
     def commit(self, path: Path | str, message: str) -> GitResult:
-        """Commit staged changes."""
         clean_msg = message.strip()
         if not clean_msg:
             clean_msg = "auto: update files via GH-BOT-REPOS"
@@ -293,7 +262,6 @@ class GitManager:
         set_upstream: bool = True,
         auth_token: Optional[str] = None,
     ) -> GitResult:
-        """Push commits to remote upstream. Uses Git Credential environment if token provided."""
         if not branch:
             branch = self.get_current_branch(path)
 
@@ -305,8 +273,6 @@ class GitManager:
 
         env = {}
         if auth_token:
-            # Inject token via basic auth header in git config parameter
-            # This avoids modifying the git repo config on disk and avoids exposing token in remote URL
             args = [
                 "-c",
                 f"http.extraHeader=Authorization: Bearer {auth_token}",
@@ -315,7 +281,6 @@ class GitManager:
         return self.run_command(path, args, timeout=60, env=env)
 
     def get_last_commit(self, path: Path | str) -> Optional[GitCommitInfo]:
-        """Fetch details of the most recent commit."""
         res = self.run_command(path, ["log", "-1", "--pretty=format:%H%x1f%h%x1f%an%x1f%ad%x1f%s"])
         if res.success and res.stdout:
             parts = res.stdout.split("\x1f")

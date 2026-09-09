@@ -1,4 +1,3 @@
-"""Settings view for GitHub authentication, Windows startup, and preferences."""
 
 from __future__ import annotations
 
@@ -10,9 +9,7 @@ from src.git.credentials import GitHubCredentials
 from src.ui.theme import Theme
 from src.utils.logger import log_event
 
-
 class SettingsView(ctk.CTkScrollableFrame):
-    """Configuration and credentials management interface."""
 
     def __init__(
         self,
@@ -47,7 +44,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         desc.pack(anchor="w", padx=20, pady=(0, 20))
 
-        # 1. GitHub Authentication Card
         auth_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
@@ -74,7 +70,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         auth_desc.pack(anchor="w", padx=16, pady=(0, 15))
 
-        # Token input row
         self.token_frame = ctk.CTkFrame(auth_card, fg_color=Theme.BG_CARD, corner_radius=0)
         self.token_frame.pack(fill="x", padx=16, pady=5)
 
@@ -104,7 +99,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         self.connect_btn.pack(side="right")
 
-        # Disconnect button & Account details row
         self.account_frame = ctk.CTkFrame(auth_card, fg_color=Theme.BG_CARD, corner_radius=0)
 
         self.account_lbl = ctk.CTkLabel(
@@ -137,7 +131,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         self.auth_feedback_lbl.pack(anchor="w", padx=16, pady=(5, 14))
 
-        # 2. Windows System Integration Card
         sys_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
@@ -156,7 +149,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         sys_title.pack(anchor="w", padx=16, pady=(16, 12))
 
-        # Startup Switch
         self.startup_switch = ctk.CTkSwitch(
             sys_card,
             text="Iniciar GH-BOT-REPOS automáticamente con Windows (Usuario actual)",
@@ -168,7 +160,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         )
         self.startup_switch.pack(anchor="w", padx=16, pady=8)
 
-        # Minimize to Tray description
         tray_note = ctk.CTkLabel(
             sys_card,
             text="• Al presionar la 'X' en la ventana, GH-BOT-REPOS se oculta al System Tray y sigue sincronizando.",
@@ -178,8 +169,6 @@ class SettingsView(ctk.CTkScrollableFrame):
         tray_note.pack(anchor="w", padx=16, pady=(10, 16))
 
     def refresh(self) -> None:
-        """Inspect current credentials and startup state."""
-        # Check GitHub token
         token = GitHubCredentials.get_token()
         if token:
             valid, user_info, err = GitHubCredentials.validate_token(token)
@@ -207,7 +196,6 @@ class SettingsView(ctk.CTkScrollableFrame):
                 text_color=Theme.TEXT_MUTED,
             )
 
-        # Check Windows Startup
         if WindowsStartup.is_startup_enabled():
             self.startup_switch.select()
         else:
