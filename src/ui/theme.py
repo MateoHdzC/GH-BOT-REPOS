@@ -4,34 +4,34 @@ from __future__ import annotations
 
 
 class Theme:
-    """Color palette and fonts for pure black & electric blue theme."""
+    """Color palette and fonts for pure solid black & electric blue theme."""
 
-    # Pure Black Surfaces
-    BG_MAIN = "#000000"       # Pure black main background
-    BG_SIDEBAR = "#000000"    # Pure black sidebar background
-    BG_CARD = "#080808"       # Deep black card surface
-    BG_CARD_HOVER = "#121212" # Black card hover state
-    BG_INPUT = "#0A0A0A"      # Deep black input surface
-    BG_GLASS_PILL = "#0D0D0D" # Dark pill surface
+    # Pure Solid Black Everywhere (Opaque #000000)
+    BG_MAIN = "#000000"       # Pure solid black main background
+    BG_SIDEBAR = "#000000"    # Pure solid black sidebar
+    BG_CARD = "#000000"       # Pure solid black cards
+    BG_CARD_HOVER = "#0A0A0A" # Subtle black hover
+    BG_INPUT = "#000000"      # Pure solid black input surface
+    BG_GLASS_PILL = "#000000"
 
     # Black Borders
-    BORDER = "#141414"        # Subtle black border
-    BORDER_GLOW = "#222222"   # Deep dark border highlight
-    BORDER_CYAN = "#0066FF"   # Blue accent border
+    BORDER = "#141414"        # Dark black border
+    BORDER_GLOW = "#1A1A1A"
+    BORDER_CYAN = "#0066FF"
 
-    # Buttons & Accents (Vibrant Blue)
-    PRIMARY = "#0066FF"       # Strong electric blue for buttons
+    # Buttons (Vibrant Electric Blue)
+    PRIMARY = "#0066FF"       # Vibrant strong blue
     PRIMARY_HOVER = "#1A75FF" # Hover blue
-    BTN_SECONDARY = "#0047B3" # Medium blue for secondary buttons
-    BTN_SECONDARY_HOVER = "#005CE6" # Secondary button hover
-    SUCCESS = "#10B981"       # Status indicator green
-    WARNING = "#F59E0B"       # Status indicator amber
-    ERROR = "#EF4444"         # Status indicator red
+    BTN_SECONDARY = "#0052CC" # Secondary button blue
+    BTN_SECONDARY_HOVER = "#0066FF" # Secondary hover blue
+    SUCCESS = "#10B981"       # Emerald green for status
+    WARNING = "#F59E0B"       # Amber warning
+    ERROR = "#EF4444"         # Coral red error
 
-    # Typography (Pure Crisp White)
-    TEXT_PRIMARY = "#FFFFFF"   # White text
-    TEXT_SECONDARY = "#E5E5E5" # Soft white for secondary labels
-    TEXT_MUTED = "#888888"     # Muted gray-white text
+    # Typography (Pure White)
+    TEXT_PRIMARY = "#FFFFFF"   # Pure white
+    TEXT_SECONDARY = "#FFFFFF" # Pure white for secondary text
+    TEXT_MUTED = "#A0A0A0"     # Light clear white-gray text
 
     # Fonts (Safe standard Windows fonts)
     FONT_FAMILY = "Segoe UI"

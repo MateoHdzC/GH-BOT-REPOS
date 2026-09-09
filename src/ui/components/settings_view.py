@@ -118,10 +118,10 @@ class SettingsView(ctk.CTkScrollableFrame):
         self.disconnect_btn = ctk.CTkButton(
             self.account_frame,
             text="Desconectar GitHub",
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_CARD,
-            hover_color=Theme.BG_INPUT,
-            text_color=Theme.ERROR,
+            hover_color=Theme.ERROR,
+            text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
             corner_radius=6,
             height=32,

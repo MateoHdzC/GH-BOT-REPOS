@@ -73,7 +73,7 @@ class GitHubCredentials:
         Returns:
             (is_valid, user_info, error_message)
         """
-        tok = token or cls.get_token()
+        tok = cls.get_token() if token is None else token.strip()
         if not tok:
             return False, {}, "No token configured"
 

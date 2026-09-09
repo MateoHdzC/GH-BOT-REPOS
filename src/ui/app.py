@@ -88,15 +88,15 @@ class MainApplication(ctk.CTk):
         self.after(1000, self._periodic_ui_refresh)
 
     def _apply_windows_glass_effects(self) -> None:
-        """Enable native Windows 11 Acrylic frosted glass window attributes."""
+        """Enable native Windows 11 Dark Mode and ensure 100% solid opaque background."""
         try:
             import ctypes
             hwnd = ctypes.windll.user32.GetParent(self.winfo_id()) or self.winfo_id()
             # DWMWA_USE_IMMERSIVE_DARK_MODE = 20
             dark = ctypes.c_int(1)
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(dark), ctypes.sizeof(dark))
-            # DWMWA_SYSTEMBACKDROP_TYPE = 38 (3 = Acrylic)
-            backdrop = ctypes.c_int(3)
+            # DWMWA_SYSTEMBACKDROP_TYPE = 38 (1 = DWMSBT_NONE, solid opaque background)
+            backdrop = ctypes.c_int(1)
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 38, ctypes.byref(backdrop), ctypes.sizeof(backdrop))
         except Exception:
             pass

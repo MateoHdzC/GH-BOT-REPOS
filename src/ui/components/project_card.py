@@ -120,10 +120,10 @@ class ProjectCard(ctk.CTkFrame):
         del_btn = ctk.CTkButton(
             action_frame,
             text="Eliminar",
-            fg_color=Theme.BG_CARD,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_CARD,
-            hover_color=Theme.BG_INPUT,
-            text_color=Theme.ERROR,
+            hover_color=Theme.ERROR,
+            text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=65,
             height=28,

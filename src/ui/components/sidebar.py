@@ -99,10 +99,10 @@ class Sidebar(ctk.CTkFrame):
         exit_btn = ctk.CTkButton(
             bottom_frame,
             text="Salir",
-            fg_color=Theme.BG_SIDEBAR,
+            fg_color=Theme.BTN_SECONDARY,
             bg_color=Theme.BG_SIDEBAR,
-            hover_color=Theme.BG_CARD,
-            text_color=Theme.ERROR,
+            hover_color=Theme.ERROR,
+            text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
             command=self.on_exit,
             height=32,
