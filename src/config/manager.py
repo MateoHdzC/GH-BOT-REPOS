@@ -31,8 +31,10 @@ class ConfigManager:
         )
         if config_path is None:
             self.config_path = get_default_config_path()
+            self._is_default_path = True
         else:
             self.config_path = Path(config_path).resolve()
+            self._is_default_path = False
 
         self._lock = threading.RLock()
         self._config = AppConfig()
@@ -48,7 +50,7 @@ class ConfigManager:
         with self._lock:
             if not self.config_path.exists():
                 # If AppData config doesn't exist yet but local workspace backup exists, migrate it
-                if self._local_backup_path.exists() and self._local_backup_path != self.config_path:
+                if self._is_default_path and self._local_backup_path.exists() and self._local_backup_path != self.config_path:
                     try:
                         self.config_path.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(self._local_backup_path, self.config_path)
@@ -91,7 +93,7 @@ class ConfigManager:
                 shutil.move(tmp_path, self.config_path)
 
                 # Mirror backup to local repo directory if it exists
-                if self._local_backup_path.parent.exists() and self._local_backup_path != self.config_path:
+                if self._is_default_path and self._local_backup_path.parent.exists() and self._local_backup_path != self.config_path:
                     try:
                         shutil.copy2(self.config_path, self._local_backup_path)
                     except Exception:

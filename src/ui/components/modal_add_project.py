@@ -80,6 +80,7 @@ class ModalAddProject(ctk.CTkToplevel):
             folder_row,
             placeholder_text="C:\\Users\\...\\MiProyecto",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
             corner_radius=6,
@@ -95,13 +96,21 @@ class ModalAddProject(ctk.CTkToplevel):
             corner_radius=6,
             border_width=0,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             hover_color=Theme.BG_CARD_HOVER,
             command=self._on_browse,
         )
         browse_btn.pack(side="right")
 
         # Git status / init alert box
-        self.git_alert_frame = ctk.CTkFrame(container, fg_color=Theme.BG_CARD, corner_radius=6)
+        self.git_alert_frame = ctk.CTkFrame(
+            container,
+            fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
+            corner_radius=6,
+            border_width=1,
+            border_color=Theme.BORDER,
+        )
         self.git_alert_lbl = ctk.CTkLabel(
             self.git_alert_frame,
             text="",
@@ -116,6 +125,7 @@ class ModalAddProject(ctk.CTkToplevel):
             width=110,
             height=26,
             fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.PRIMARY_HOVER,
             command=self._on_init_git,
         )
@@ -126,8 +136,10 @@ class ModalAddProject(ctk.CTkToplevel):
             container,
             placeholder_text="MiProyecto",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
             height=34,
         )
         self.name_entry.pack(fill="x", pady=(2, 12))
@@ -138,43 +150,49 @@ class ModalAddProject(ctk.CTkToplevel):
             container,
             placeholder_text="https://github.com/usuario/proyecto.git",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
             height=34,
         )
         self.remote_entry.pack(fill="x", pady=(2, 12))
 
         # 4. Branch & Mode Grid
-        branch_mode_row = ctk.CTkFrame(container, fg_color="transparent")
+        branch_mode_row = ctk.CTkFrame(container, fg_color=Theme.BG_MAIN, corner_radius=0)
         branch_mode_row.pack(fill="x", pady=5)
         branch_mode_row.columnconfigure(0, weight=1)
         branch_mode_row.columnconfigure(1, weight=1)
 
         # Branch
-        col0 = ctk.CTkFrame(branch_mode_row, fg_color="transparent")
+        col0 = ctk.CTkFrame(branch_mode_row, fg_color=Theme.BG_MAIN, corner_radius=0)
         col0.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         self._add_label(col0, "Rama (Branch):")
         self.branch_entry = ctk.CTkEntry(
             col0,
             placeholder_text="main",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
             height=34,
         )
         self.branch_entry.insert(0, "main")
         self.branch_entry.pack(fill="x", pady=(2, 0))
 
         # Mode
-        col1 = ctk.CTkFrame(branch_mode_row, fg_color="transparent")
+        col1 = ctk.CTkFrame(branch_mode_row, fg_color=Theme.BG_MAIN, corner_radius=0)
         col1.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
         self._add_label(col1, "Modo de Sincronización:")
         self.mode_menu = ctk.CTkOptionMenu(
             col1,
             values=["AUTO", "COMMIT_ONLY", "PAUSED"],
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             button_color=Theme.PRIMARY,
             button_hover_color=Theme.PRIMARY_HOVER,
+            corner_radius=6,
             height=34,
         )
         self.mode_menu.set("AUTO")
@@ -186,15 +204,24 @@ class ModalAddProject(ctk.CTkToplevel):
             container,
             values=list(DEBOUNCE_OPTIONS.keys()),
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             button_color=Theme.PRIMARY,
             button_hover_color=Theme.PRIMARY_HOVER,
+            corner_radius=6,
             height=34,
         )
         self.debounce_menu.set("5 minutos (300s)")
         self.debounce_menu.pack(fill="x", pady=(2, 12))
 
         # 6. Safety & Dry Run Toggles
-        options_frame = ctk.CTkFrame(container, fg_color=Theme.BG_CARD, corner_radius=8)
+        options_frame = ctk.CTkFrame(
+            container,
+            fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
+            corner_radius=8,
+            border_width=1,
+            border_color=Theme.BORDER,
+        )
         options_frame.pack(fill="x", pady=10)
 
         self.safety_chk = ctk.CTkCheckBox(
@@ -202,6 +229,7 @@ class ModalAddProject(ctk.CTkToplevel):
             text="Safety Guard activo (protege contra secretos y eliminaciones masivas)",
             text_color=Theme.TEXT_PRIMARY,
             fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.PRIMARY_HOVER,
         )
         self.safety_chk.select()
@@ -212,6 +240,7 @@ class ModalAddProject(ctk.CTkToplevel):
             text="Modo DRY RUN (simula commits y pushes sin alterar Git ni GitHub)",
             text_color=Theme.TEXT_SECONDARY,
             fg_color=Theme.WARNING,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.WARNING,
         )
         self.dry_run_chk.pack(anchor="w", padx=14, pady=(6, 12))
@@ -226,13 +255,14 @@ class ModalAddProject(ctk.CTkToplevel):
         self.error_label.pack(anchor="w", pady=5)
 
         # Bottom Buttons
-        btn_row = ctk.CTkFrame(self, fg_color="transparent")
+        btn_row = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         btn_row.pack(side="bottom", fill="x", padx=25, pady=20)
 
         cancel_btn = ctk.CTkButton(
             btn_row,
             text="Cancelar",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             hover_color=Theme.BG_CARD_HOVER,
             text_color=Theme.TEXT_SECONDARY,
             height=36,
@@ -247,6 +277,7 @@ class ModalAddProject(ctk.CTkToplevel):
             btn_row,
             text="Añadir Proyecto",
             fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_MAIN,
             hover_color=Theme.PRIMARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             height=36,

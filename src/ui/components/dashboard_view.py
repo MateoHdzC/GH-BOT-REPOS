@@ -41,7 +41,7 @@ class DashboardView(ctk.CTkScrollableFrame):
         desc_lbl.pack(anchor="w", padx=20, pady=(0, 20))
 
         # Metrics Grid (2 rows x 4 cols)
-        metrics_grid = ctk.CTkFrame(self, fg_color="transparent")
+        metrics_grid = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         metrics_grid.pack(fill="x", padx=20, pady=5)
         for col in range(4):
             metrics_grid.columnconfigure(col, weight=1)
@@ -68,6 +68,7 @@ class DashboardView(ctk.CTkScrollableFrame):
         sys_box = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=10,
             border_width=1,
             border_color=Theme.BORDER,
@@ -85,6 +86,7 @@ class DashboardView(ctk.CTkScrollableFrame):
         card = ctk.CTkFrame(
             parent,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=10,
             border_width=1,
             border_color=Theme.BORDER,
@@ -110,7 +112,7 @@ class DashboardView(ctk.CTkScrollableFrame):
         self._stat_cards[label] = val_lbl
 
     def _add_system_row(self, parent, label: str, value: str) -> None:
-        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row = ctk.CTkFrame(parent, fg_color=Theme.BG_CARD, corner_radius=0)
         row.pack(fill="x", padx=16, pady=8)
 
         lbl = ctk.CTkLabel(

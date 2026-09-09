@@ -34,7 +34,7 @@ class Sidebar(ctk.CTkFrame):
 
     def _build_ui(self) -> None:
         # App Title
-        title_frame = ctk.CTkFrame(self, fg_color="transparent")
+        title_frame = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         title_frame.pack(fill="x", padx=20, pady=(25, 20))
 
         title_label = ctk.CTkLabel(
@@ -58,7 +58,7 @@ class Sidebar(ctk.CTkFrame):
         sep1.pack(fill="x", padx=15, pady=5)
 
         # Navigation Links
-        nav_container = ctk.CTkFrame(self, fg_color="transparent")
+        nav_container = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         nav_container.pack(fill="x", padx=10, pady=10)
 
         self._create_nav_btn(nav_container, "todos", "📁 Todos", count="0")
@@ -69,7 +69,7 @@ class Sidebar(ctk.CTkFrame):
         self._create_nav_btn(nav_container, "configuracion", "⚙ Configuración")
 
         # Bottom System Indicators & Exit
-        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
+        bottom_frame = ctk.CTkFrame(self, fg_color=Theme.BG_SIDEBAR, corner_radius=0)
         bottom_frame.pack(side="bottom", fill="x", padx=15, pady=20)
 
         sep2 = ctk.CTkFrame(bottom_frame, fg_color=Theme.BORDER, height=1, corner_radius=0, border_width=0)
@@ -99,7 +99,8 @@ class Sidebar(ctk.CTkFrame):
         exit_btn = ctk.CTkButton(
             bottom_frame,
             text="Salir",
-            fg_color="transparent",
+            fg_color=Theme.BG_SIDEBAR,
+            bg_color=Theme.BG_SIDEBAR,
             hover_color=Theme.BG_CARD,
             text_color=Theme.ERROR,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
@@ -111,15 +112,17 @@ class Sidebar(ctk.CTkFrame):
         exit_btn.pack(fill="x", pady=(15, 0))
 
     def _create_nav_btn(self, parent, view_key: str, label: str, count: str = "") -> None:
-        btn_frame = ctk.CTkFrame(parent, fg_color="transparent", height=38)
+        btn_frame = ctk.CTkFrame(parent, fg_color=Theme.BG_SIDEBAR, corner_radius=0, height=38)
         btn_frame.pack(fill="x", pady=2)
 
+        is_selected = (view_key == self._current_view)
         btn = ctk.CTkButton(
             btn_frame,
             text=label,
-            fg_color="transparent" if view_key != self._current_view else Theme.PRIMARY,
-            text_color=Theme.TEXT_PRIMARY if view_key == self._current_view else Theme.TEXT_SECONDARY,
-            hover_color=Theme.PRIMARY_HOVER if view_key == self._current_view else Theme.BG_CARD_HOVER,
+            fg_color=Theme.PRIMARY if is_selected else Theme.BG_SIDEBAR,
+            bg_color=Theme.BG_SIDEBAR,
+            text_color=Theme.TEXT_PRIMARY if is_selected else Theme.TEXT_SECONDARY,
+            hover_color=Theme.PRIMARY_HOVER if is_selected else Theme.BG_CARD_HOVER,
             anchor="w",
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=13),
             command=lambda: self._select_view(view_key),
@@ -153,11 +156,12 @@ class Sidebar(ctk.CTkFrame):
                 )
             else:
                 v["btn"].configure(
-                    fg_color="transparent",
+                    fg_color=Theme.BG_SIDEBAR,
                     text_color=Theme.TEXT_SECONDARY,
                     hover_color=Theme.BG_CARD_HOVER,
                 )
         self.on_navigate(view_key)
+
 
     def update_counts(self, total: int, active: int, paused: int) -> None:
         """Update navigation badge counters."""

@@ -26,6 +26,7 @@ class ProjectCard(ctk.CTkFrame):
         super().__init__(
             master,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=10,
             border_width=1,
             border_color=Theme.BORDER,
@@ -43,7 +44,7 @@ class ProjectCard(ctk.CTkFrame):
         cfg = self.manager.config
 
         # 1. Header Frame: Project Name & Status Badge
-        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         header_frame.pack(fill="x", padx=18, pady=(15, 8))
 
         name_label = ctk.CTkLabel(
@@ -64,7 +65,7 @@ class ProjectCard(ctk.CTkFrame):
         self.status_badge.pack(side="right")
 
         # 2. Details Grid (Path, Branch, Remote, Last commit, Last sync)
-        grid_frame = ctk.CTkFrame(self, fg_color="transparent")
+        grid_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         grid_frame.pack(fill="x", padx=18, pady=5)
         grid_frame.columnconfigure(1, weight=1)
 
@@ -85,7 +86,7 @@ class ProjectCard(ctk.CTkFrame):
         self.last_sync_lbl = self._add_field(grid_frame, 4, "Última sincronización:", sync_display)
 
         # 3. Action Bar: Mode Selector & Buttons
-        action_frame = ctk.CTkFrame(self, fg_color="transparent")
+        action_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         action_frame.pack(fill="x", padx=18, pady=(12, 16))
 
         # Mode Selector
@@ -101,11 +102,13 @@ class ProjectCard(ctk.CTkFrame):
             action_frame,
             values=["AUTO", "COMMIT_ONLY", "PAUSED"],
             command=self._on_mode_selected,
-            font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
+            font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11, weight="bold"),
             selected_color=Theme.PRIMARY,
             selected_hover_color=Theme.PRIMARY_HOVER,
-            unselected_color=Theme.BG_MAIN,
+            unselected_color=Theme.BG_INPUT,
             unselected_hover_color=Theme.BG_CARD_HOVER,
+            text_color=Theme.TEXT_PRIMARY,
+            bg_color=Theme.BG_CARD,
             corner_radius=6,
             border_width=0,
             height=28,
@@ -117,8 +120,9 @@ class ProjectCard(ctk.CTkFrame):
         del_btn = ctk.CTkButton(
             action_frame,
             text="Eliminar",
-            fg_color="transparent",
-            hover_color=Theme.BG_MAIN,
+            fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_CARD,
+            hover_color=Theme.BG_INPUT,
             text_color=Theme.ERROR,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=65,
@@ -132,7 +136,8 @@ class ProjectCard(ctk.CTkFrame):
         history_btn = ctk.CTkButton(
             action_frame,
             text="Historial",
-            fg_color=Theme.BG_MAIN,
+            fg_color=Theme.BG_INPUT,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.BG_CARD_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
@@ -148,6 +153,7 @@ class ProjectCard(ctk.CTkFrame):
             action_frame,
             text="⚡ Subir ahora",
             fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.PRIMARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11, weight="bold"),

@@ -44,6 +44,7 @@ class ModalProjectHistory(ctk.CTkToplevel):
         container = ctk.CTkScrollableFrame(
             self,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=8,
             border_width=1,
             border_color=Theme.BORDER,
@@ -60,7 +61,7 @@ class ModalProjectHistory(ctk.CTkToplevel):
             empty_lbl.pack(pady=40)
         else:
             for entry in self.manager.history:
-                row = ctk.CTkFrame(container, fg_color="transparent")
+                row = ctk.CTkFrame(container, fg_color=Theme.BG_CARD, corner_radius=0)
                 row.pack(fill="x", padx=12, pady=8)
 
                 time_lbl = ctk.CTkLabel(
@@ -101,8 +102,11 @@ class ModalProjectHistory(ctk.CTkToplevel):
             self,
             text="Cerrar",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             hover_color=Theme.BG_CARD_HOVER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
+            border_width=0,
             height=32,
             width=90,
             command=self.destroy,

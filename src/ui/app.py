@@ -133,6 +133,7 @@ class MainApplication(ctk.CTk):
             fg_color=Theme.PRIMARY,
             hover_color=Theme.PRIMARY_HOVER,
             text_color=Theme.TEXT_PRIMARY,
+            bg_color=Theme.BG_MAIN,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
             height=34,
             width=130,
@@ -146,6 +147,7 @@ class MainApplication(ctk.CTk):
             self.top_bar,
             text="⚡ Subir Todos",
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             hover_color=Theme.BG_CARD_HOVER,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12),
@@ -231,7 +233,14 @@ class MainApplication(ctk.CTk):
             filtered = managers
 
         if not filtered:
-            empty_box = ctk.CTkFrame(self.projects_scroll, fg_color=Theme.BG_CARD, corner_radius=10)
+            empty_box = ctk.CTkFrame(
+                self.projects_scroll,
+                fg_color=Theme.BG_CARD,
+                bg_color=Theme.BG_MAIN,
+                corner_radius=10,
+                border_width=1,
+                border_color=Theme.BORDER,
+            )
             empty_box.pack(fill="x", pady=40, padx=20)
             empty_lbl = ctk.CTkLabel(
                 empty_box,

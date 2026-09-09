@@ -51,6 +51,7 @@ class SettingsView(ctk.CTkScrollableFrame):
         auth_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=10,
             border_width=1,
             border_color=Theme.BORDER,
@@ -74,16 +75,18 @@ class SettingsView(ctk.CTkScrollableFrame):
         auth_desc.pack(anchor="w", padx=16, pady=(0, 15))
 
         # Token input row
-        self.token_frame = ctk.CTkFrame(auth_card, fg_color="transparent")
+        self.token_frame = ctk.CTkFrame(auth_card, fg_color=Theme.BG_CARD, corner_radius=0)
         self.token_frame.pack(fill="x", padx=16, pady=5)
 
         self.token_entry = ctk.CTkEntry(
             self.token_frame,
             placeholder_text="Ingresa tu Personal Access Token (ghp_...)",
             show="•",
-            fg_color=Theme.BG_MAIN,
+            fg_color=Theme.BG_INPUT,
+            bg_color=Theme.BG_CARD,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
             height=34,
         )
         self.token_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -92,15 +95,17 @@ class SettingsView(ctk.CTkScrollableFrame):
             self.token_frame,
             text="Conectar GitHub",
             fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
             hover_color=Theme.PRIMARY_HOVER,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
+            corner_radius=6,
             height=34,
             command=self._on_connect_github,
         )
         self.connect_btn.pack(side="right")
 
         # Disconnect button & Account details row
-        self.account_frame = ctk.CTkFrame(auth_card, fg_color="transparent")
+        self.account_frame = ctk.CTkFrame(auth_card, fg_color=Theme.BG_CARD, corner_radius=0)
 
         self.account_lbl = ctk.CTkLabel(
             self.account_frame,
@@ -113,10 +118,12 @@ class SettingsView(ctk.CTkScrollableFrame):
         self.disconnect_btn = ctk.CTkButton(
             self.account_frame,
             text="Desconectar GitHub",
-            fg_color="transparent",
-            hover_color=Theme.BG_MAIN,
+            fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_CARD,
+            hover_color=Theme.BG_INPUT,
             text_color=Theme.ERROR,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
+            corner_radius=6,
             height=32,
             command=self._on_disconnect_github,
         )
@@ -134,6 +141,7 @@ class SettingsView(ctk.CTkScrollableFrame):
         sys_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
+            bg_color=Theme.BG_MAIN,
             corner_radius=10,
             border_width=1,
             border_color=Theme.BORDER,
@@ -155,6 +163,7 @@ class SettingsView(ctk.CTkScrollableFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12),
             text_color=Theme.TEXT_PRIMARY,
             progress_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
             command=self._on_startup_toggle,
         )
         self.startup_switch.pack(anchor="w", padx=16, pady=8)
