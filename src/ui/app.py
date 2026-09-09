@@ -14,6 +14,7 @@ from src.config.manager import ConfigManager
 from src.config.models import ProjectConfig, ProjectMode, ProjectStatus
 from src.core.engine import Engine
 from src.core.project_manager import ProjectManager
+from src.core.startup import WindowsStartup
 from src.git.credentials import GitHubCredentials
 from src.ui.components.dashboard_view import DashboardView
 from src.ui.components.logs_view import LogsView
@@ -79,6 +80,9 @@ class MainApplication(ctk.CTk):
         # Apply Windows 11 Acrylic / Glass DWM effect
         if os.name == "nt":
             self.after(50, self._apply_windows_glass_effects)
+            # Ensure startup is configured if enabled in settings
+            if self.config_manager.config.start_with_windows and not WindowsStartup.is_startup_enabled():
+                WindowsStartup.enable_startup()
 
         # Periodic refresh cycle
         self.after(1000, self._periodic_ui_refresh)

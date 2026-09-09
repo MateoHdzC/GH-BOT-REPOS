@@ -26,7 +26,7 @@ class WindowsStartup:
         else:
             # Running as Python script
             python_exe = sys.executable
-            main_script = Path(__file__).resolve().parent.parent / "main.py"
+            main_script = Path(__file__).resolve().parent.parent.parent / "main.py"
             return f'"{python_exe}" "{main_script}" --tray'
 
     @classmethod

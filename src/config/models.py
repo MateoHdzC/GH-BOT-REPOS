@@ -117,7 +117,7 @@ class ProjectConfig:
 class AppConfig:
     """Global configuration settings for GH-BOT-REPOS."""
     projects: List[ProjectConfig] = field(default_factory=list)
-    start_with_windows: bool = False
+    start_with_windows: bool = True
     minimize_to_tray: bool = True
     notifications_enabled: bool = True
     global_dry_run: bool = False
@@ -137,7 +137,7 @@ class AppConfig:
         projects = [ProjectConfig.from_dict(p) for p in projects_data if isinstance(p, dict) and "name" in p and "path" in p]
         return cls(
             projects=projects,
-            start_with_windows=bool(data.get("start_with_windows", False)),
+            start_with_windows=bool(data.get("start_with_windows", True)),
             minimize_to_tray=bool(data.get("minimize_to_tray", True)),
             notifications_enabled=bool(data.get("notifications_enabled", True)),
             global_dry_run=bool(data.get("global_dry_run", False)),

@@ -14,14 +14,23 @@ from src.config.models import AppConfig, ProjectConfig, ProjectMode
 from src.utils.logger import log_event
 
 
+def get_default_config_path() -> Path:
+    """Resolve permanent local machine configuration path in Windows AppData."""
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        return Path(appdata) / "GH-BOT-REPOS" / "projects.json"
+    return Path.home() / ".gh_bot_repos" / "projects.json"
+
+
 class ConfigManager:
     """Thread-safe manager for projects.json configuration."""
 
     def __init__(self, config_path: Optional[Path] = None):
+        self._local_backup_path = (
+            Path(__file__).resolve().parent.parent.parent / "config" / "projects.json"
+        )
         if config_path is None:
-            self.config_path = (
-                Path(__file__).resolve().parent.parent.parent / "config" / "projects.json"
-            )
+            self.config_path = get_default_config_path()
         else:
             self.config_path = Path(config_path).resolve()
 
@@ -38,6 +47,16 @@ class ConfigManager:
         """Load configuration from JSON file or create a default one."""
         with self._lock:
             if not self.config_path.exists():
+                # If AppData config doesn't exist yet but local workspace backup exists, migrate it
+                if self._local_backup_path.exists() and self._local_backup_path != self.config_path:
+                    try:
+                        self.config_path.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(self._local_backup_path, self.config_path)
+                        log_event("SYSTEM", f"Migrated local config to persistent path: {self.config_path}")
+                    except Exception:
+                        pass
+
+            if not self.config_path.exists():
                 self.config_path.parent.mkdir(parents=True, exist_ok=True)
                 self._config = AppConfig()
                 self.save()
@@ -47,7 +66,7 @@ class ConfigManager:
                 with open(self.config_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 self._config = AppConfig.from_dict(data)
-                log_event("SYSTEM", f"Config loaded: {len(self._config.projects)} projects")
+                log_event("SYSTEM", f"Config loaded: {len(self._config.projects)} projects from {self.config_path}")
             except Exception as ex:
                 log_event("ERROR", f"Failed to load config from {self.config_path}: {ex}")
                 self._config = AppConfig()
@@ -70,6 +89,14 @@ class ConfigManager:
                     json.dump(data, f, indent=2, ensure_ascii=False)
 
                 shutil.move(tmp_path, self.config_path)
+
+                # Mirror backup to local repo directory if it exists
+                if self._local_backup_path.parent.exists() and self._local_backup_path != self.config_path:
+                    try:
+                        shutil.copy2(self.config_path, self._local_backup_path)
+                    except Exception:
+                        pass
+
                 return True
             except Exception as ex:
                 log_event("ERROR", f"Failed to save config to {self.config_path}: {ex}")
