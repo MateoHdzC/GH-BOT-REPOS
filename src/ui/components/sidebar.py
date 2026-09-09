@@ -117,9 +117,9 @@ class Sidebar(ctk.CTkFrame):
         btn = ctk.CTkButton(
             btn_frame,
             text=label,
-            fg_color="transparent" if view_key != self._current_view else Theme.BG_CARD,
+            fg_color="transparent" if view_key != self._current_view else Theme.PRIMARY,
             text_color=Theme.TEXT_PRIMARY if view_key == self._current_view else Theme.TEXT_SECONDARY,
-            hover_color=Theme.BG_CARD,
+            hover_color=Theme.PRIMARY_HOVER if view_key == self._current_view else Theme.BG_CARD_HOVER,
             anchor="w",
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=13),
             command=lambda: self._select_view(view_key),
@@ -146,9 +146,17 @@ class Sidebar(ctk.CTkFrame):
         self._current_view = view_key
         for k, v in self._nav_buttons.items():
             if k == view_key:
-                v["btn"].configure(fg_color=Theme.BG_CARD, text_color=Theme.TEXT_PRIMARY)
+                v["btn"].configure(
+                    fg_color=Theme.PRIMARY,
+                    text_color=Theme.TEXT_PRIMARY,
+                    hover_color=Theme.PRIMARY_HOVER,
+                )
             else:
-                v["btn"].configure(fg_color="transparent", text_color=Theme.TEXT_SECONDARY)
+                v["btn"].configure(
+                    fg_color="transparent",
+                    text_color=Theme.TEXT_SECONDARY,
+                    hover_color=Theme.BG_CARD_HOVER,
+                )
         self.on_navigate(view_key)
 
     def update_counts(self, total: int, active: int, paused: int) -> None:
