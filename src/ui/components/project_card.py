@@ -26,9 +26,8 @@ class ProjectCard(ctk.CTkFrame):
         super().__init__(
             master,
             fg_color=Theme.BG_CARD,
-            corner_radius=10,
-            border_width=1,
-            border_color=Theme.BORDER,
+            corner_radius=8,
+            border_width=0,
             **kwargs,
         )
         self.manager = manager
@@ -106,6 +105,8 @@ class ProjectCard(ctk.CTkFrame):
             selected_hover_color=Theme.PRIMARY_HOVER,
             unselected_color=Theme.BG_MAIN,
             unselected_hover_color=Theme.BG_CARD_HOVER,
+            corner_radius=6,
+            border_width=0,
             height=28,
         )
         self.mode_selector.set(cfg.mode.value)
@@ -121,6 +122,8 @@ class ProjectCard(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=65,
             height=28,
+            corner_radius=6,
+            border_width=0,
             command=lambda: self.on_delete(cfg.path),
         )
         del_btn.pack(side="right", padx=(5, 0))
@@ -134,6 +137,8 @@ class ProjectCard(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=70,
             height=28,
+            corner_radius=6,
+            border_width=0,
             command=lambda: self.on_view_history(self.manager),
         )
         history_btn.pack(side="right", padx=5)
@@ -147,6 +152,8 @@ class ProjectCard(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11, weight="bold"),
             width=100,
             height=28,
+            corner_radius=6,
+            border_width=0,
             command=lambda: self.on_sync_now(cfg.path),
         )
         sync_btn.pack(side="right", padx=5)

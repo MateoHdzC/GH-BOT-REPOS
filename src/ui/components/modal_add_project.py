@@ -68,12 +68,12 @@ class ModalAddProject(ctk.CTkToplevel):
         desc_lbl.pack(anchor="w", padx=25, pady=(0, 15))
 
         # Main scrollable container
-        container = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        container = ctk.CTkScrollableFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         container.pack(fill="both", expand=True, padx=25, pady=5)
 
         # 1. Folder Selection
         self._add_label(container, "Carpeta del Proyecto:")
-        folder_row = ctk.CTkFrame(container, fg_color="transparent")
+        folder_row = ctk.CTkFrame(container, fg_color=Theme.BG_MAIN, corner_radius=0)
         folder_row.pack(fill="x", pady=(2, 8))
 
         self.path_entry = ctk.CTkEntry(
@@ -82,6 +82,7 @@ class ModalAddProject(ctk.CTkToplevel):
             fg_color=Theme.BG_CARD,
             border_color=Theme.BORDER,
             text_color=Theme.TEXT_PRIMARY,
+            corner_radius=6,
             height=34,
         )
         self.path_entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
@@ -91,6 +92,8 @@ class ModalAddProject(ctk.CTkToplevel):
             text="Explorar...",
             width=90,
             height=34,
+            corner_radius=6,
+            border_width=0,
             fg_color=Theme.BG_CARD,
             hover_color=Theme.BG_CARD_HOVER,
             command=self._on_browse,
@@ -234,6 +237,8 @@ class ModalAddProject(ctk.CTkToplevel):
             text_color=Theme.TEXT_SECONDARY,
             height=36,
             width=100,
+            corner_radius=6,
+            border_width=0,
             command=self.destroy,
         )
         cancel_btn.pack(side="left")
@@ -246,6 +251,8 @@ class ModalAddProject(ctk.CTkToplevel):
             text_color=Theme.TEXT_PRIMARY,
             height=36,
             width=130,
+            corner_radius=6,
+            border_width=0,
             command=self._on_save,
         )
         save_btn.pack(side="right")

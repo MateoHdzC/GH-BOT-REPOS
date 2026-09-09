@@ -89,11 +89,11 @@ class MainApplication(ctk.CTk):
         self.sidebar.pack(side="left", fill="y")
 
         # 2. Main Container
-        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_container = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.main_container.pack(side="right", fill="both", expand=True)
 
         # Top Bar (Title + Action Buttons)
-        self.top_bar = ctk.CTkFrame(self.main_container, fg_color="transparent", height=60)
+        self.top_bar = ctk.CTkFrame(self.main_container, fg_color=Theme.BG_MAIN, height=60, corner_radius=0)
         self.top_bar.pack(fill="x", padx=25, pady=(20, 10))
 
         self.view_title_lbl = ctk.CTkLabel(
@@ -114,6 +114,8 @@ class MainApplication(ctk.CTk):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
             height=34,
             width=130,
+            corner_radius=6,
+            border_width=0,
             command=self._open_add_project_modal,
         )
         self.add_btn.pack(side="right", padx=(10, 0))
@@ -127,16 +129,18 @@ class MainApplication(ctk.CTk):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12),
             height=34,
             width=110,
+            corner_radius=6,
+            border_width=0,
             command=self._sync_all_projects,
         )
         self.sync_all_btn.pack(side="right")
 
         # Content Area
-        self.content_frame = ctk.CTkFrame(self.main_container, fg_color="transparent")
+        self.content_frame = ctk.CTkFrame(self.main_container, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.content_frame.pack(fill="both", expand=True, padx=25, pady=(0, 20))
 
         # 3. Views Initialization
-        self.projects_scroll = ctk.CTkScrollableFrame(self.content_frame, fg_color="transparent")
+        self.projects_scroll = ctk.CTkScrollableFrame(self.content_frame, fg_color=Theme.BG_MAIN, corner_radius=0)
         self.dashboard_view = DashboardView(self.content_frame, self.engine)
         logs_path = Path(__file__).resolve().parent.parent.parent / "logs" / "app.log"
         self.logs_view = LogsView(self.content_frame, logs_path)

@@ -14,7 +14,8 @@ class DashboardView(ctk.CTkScrollableFrame):
     def __init__(self, master, engine: Engine, **kwargs):
         super().__init__(
             master,
-            fg_color="transparent",
+            fg_color=Theme.BG_MAIN,
+            corner_radius=0,
             **kwargs,
         )
         self.engine = engine
@@ -67,9 +68,8 @@ class DashboardView(ctk.CTkScrollableFrame):
         sys_box = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=10,
-            border_width=1,
-            border_color=Theme.BORDER,
+            corner_radius=8,
+            border_width=0,
         )
         sys_box.pack(fill="x", padx=20, pady=5)
 
@@ -85,8 +85,7 @@ class DashboardView(ctk.CTkScrollableFrame):
             parent,
             fg_color=Theme.BG_CARD,
             corner_radius=8,
-            border_width=1,
-            border_color=Theme.BORDER,
+            border_width=0,
         )
         card.grid(row=row, column=col, padx=6, pady=6, sticky="nsew")
 

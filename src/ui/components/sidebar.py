@@ -54,7 +54,7 @@ class Sidebar(ctk.CTkFrame):
         sub_label.pack(anchor="w")
 
         # Separator
-        sep1 = ctk.CTkFrame(self, fg_color=Theme.BORDER, height=1)
+        sep1 = ctk.CTkFrame(self, fg_color=Theme.BORDER, height=1, corner_radius=0, border_width=0)
         sep1.pack(fill="x", padx=15, pady=5)
 
         # Navigation Links
@@ -72,7 +72,7 @@ class Sidebar(ctk.CTkFrame):
         bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
         bottom_frame.pack(side="bottom", fill="x", padx=15, pady=20)
 
-        sep2 = ctk.CTkFrame(bottom_frame, fg_color=Theme.BORDER, height=1)
+        sep2 = ctk.CTkFrame(bottom_frame, fg_color=Theme.BORDER, height=1, corner_radius=0, border_width=0)
         sep2.pack(fill="x", pady=(0, 15))
 
         # GitHub Status
@@ -105,6 +105,8 @@ class Sidebar(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12, weight="bold"),
             command=self.on_exit,
             height=32,
+            corner_radius=6,
+            border_width=0,
         )
         exit_btn.pack(fill="x", pady=(15, 0))
 
@@ -122,6 +124,8 @@ class Sidebar(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=13),
             command=lambda: self._select_view(view_key),
             height=36,
+            corner_radius=6,
+            border_width=0,
         )
         btn.pack(side="left", fill="x", expand=True)
 

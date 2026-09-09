@@ -18,7 +18,8 @@ class LogsView(ctk.CTkFrame):
     def __init__(self, master, log_file_path: Path, **kwargs):
         super().__init__(
             master,
-            fg_color="transparent",
+            fg_color=Theme.BG_MAIN,
+            corner_radius=0,
             **kwargs,
         )
         self.log_file_path = log_file_path
@@ -31,7 +32,7 @@ class LogsView(ctk.CTkFrame):
 
     def _build_ui(self) -> None:
         # Header & Controls
-        header = ctk.CTkFrame(self, fg_color="transparent")
+        header = ctk.CTkFrame(self, fg_color=Theme.BG_MAIN, corner_radius=0)
         header.pack(fill="x", padx=20, pady=(20, 10))
 
         title = ctk.CTkLabel(
@@ -52,6 +53,8 @@ class LogsView(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=90,
             height=30,
+            corner_radius=6,
+            border_width=0,
             command=self._open_log_file,
         )
         open_btn.pack(side="right", padx=(6, 0))
@@ -65,6 +68,8 @@ class LogsView(ctk.CTkFrame):
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
             width=70,
             height=30,
+            corner_radius=6,
+            border_width=0,
             command=self._clear_logs,
         )
         clear_btn.pack(side="right", padx=6)
@@ -88,6 +93,7 @@ class LogsView(ctk.CTkFrame):
             fg_color=Theme.BG_CARD,
             button_color=Theme.PRIMARY,
             button_hover_color=Theme.PRIMARY_HOVER,
+            corner_radius=6,
             width=120,
             height=30,
         )
@@ -100,8 +106,8 @@ class LogsView(ctk.CTkFrame):
             fg_color=Theme.BG_CARD,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_MONO, size=11),
-            border_width=1,
-            border_color=Theme.BORDER,
+            corner_radius=8,
+            border_width=0,
             wrap="none",
         )
         self.text_box.pack(fill="both", expand=True, padx=20, pady=(5, 20))

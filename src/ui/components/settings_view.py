@@ -22,7 +22,8 @@ class SettingsView(ctk.CTkScrollableFrame):
     ):
         super().__init__(
             master,
-            fg_color="transparent",
+            fg_color=Theme.BG_MAIN,
+            corner_radius=0,
             **kwargs,
         )
         self.on_auth_changed = on_auth_changed
@@ -50,9 +51,8 @@ class SettingsView(ctk.CTkScrollableFrame):
         auth_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=10,
-            border_width=1,
-            border_color=Theme.BORDER,
+            corner_radius=8,
+            border_width=0,
         )
         auth_card.pack(fill="x", padx=20, pady=10)
 
@@ -133,9 +133,8 @@ class SettingsView(ctk.CTkScrollableFrame):
         sys_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=10,
-            border_width=1,
-            border_color=Theme.BORDER,
+            corner_radius=8,
+            border_width=0,
         )
         sys_card.pack(fill="x", padx=20, pady=15)
 
