@@ -68,8 +68,9 @@ class DashboardView(ctk.CTkScrollableFrame):
         sys_box = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
         )
         sys_box.pack(fill="x", padx=20, pady=5)
 
@@ -84,8 +85,9 @@ class DashboardView(ctk.CTkScrollableFrame):
         card = ctk.CTkFrame(
             parent,
             fg_color=Theme.BG_CARD,
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
         )
         card.grid(row=row, column=col, padx=6, pady=6, sticky="nsew")
 

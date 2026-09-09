@@ -76,8 +76,26 @@ class MainApplication(ctk.CTk):
         # Connect notifications dispatch
         self.engine.on_notify = self._dispatch_notification
 
+        # Apply Windows 11 Acrylic / Glass DWM effect
+        if os.name == "nt":
+            self.after(50, self._apply_windows_glass_effects)
+
         # Periodic refresh cycle
         self.after(1000, self._periodic_ui_refresh)
+
+    def _apply_windows_glass_effects(self) -> None:
+        """Enable native Windows 11 Acrylic frosted glass window attributes."""
+        try:
+            import ctypes
+            hwnd = ctypes.windll.user32.GetParent(self.winfo_id()) or self.winfo_id()
+            # DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+            dark = ctypes.c_int(1)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(dark), ctypes.sizeof(dark))
+            # DWMWA_SYSTEMBACKDROP_TYPE = 38 (3 = Acrylic)
+            backdrop = ctypes.c_int(3)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 38, ctypes.byref(backdrop), ctypes.sizeof(backdrop))
+        except Exception:
+            pass
 
     def _build_layout(self) -> None:
         # 1. Left Sidebar

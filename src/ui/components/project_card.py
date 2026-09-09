@@ -26,8 +26,9 @@ class ProjectCard(ctk.CTkFrame):
         super().__init__(
             master,
             fg_color=Theme.BG_CARD,
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
             **kwargs,
         )
         self.manager = manager

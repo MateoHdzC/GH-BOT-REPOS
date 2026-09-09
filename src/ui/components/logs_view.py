@@ -106,8 +106,9 @@ class LogsView(ctk.CTkFrame):
             fg_color=Theme.BG_CARD,
             text_color=Theme.TEXT_PRIMARY,
             font=ctk.CTkFont(family=Theme.FONT_MONO, size=11),
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
             wrap="none",
         )
         self.text_box.pack(fill="both", expand=True, padx=20, pady=(5, 20))

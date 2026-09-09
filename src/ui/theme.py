@@ -6,17 +6,22 @@ from __future__ import annotations
 class Theme:
     """Color palette and fonts for modern Windows Dark Mode."""
 
-    # Colors (Deep Black + Strong Midnight Blue)
-    BG_MAIN = "#08090C"
-    BG_SIDEBAR = "#040507"
-    BG_CARD = "#0F131C"
-    BG_CARD_HOVER = "#161C2A"
-    BG_INPUT = "#0A0D14"
-    BORDER = "#1E2738"
+    # Glassmorphic Palette: Frosted Dark Glass + Obsidian + Electric Blue Specular
+    BG_MAIN = "#06080E"
+    BG_SIDEBAR = "#040508"
+    BG_CARD = "#0C1322"
+    BG_CARD_HOVER = "#121C30"
+    BG_INPUT = "#080D17"
+    BG_GLASS_PILL = "#10192A"
 
-    # Accents (Strong Electric Blue & Indicators)
+    # Glass Specular Edges (Refraction Borders)
+    BORDER = "#1B2A42"
+    BORDER_GLOW = "#25406B"
+    BORDER_CYAN = "#00B4D8"
+
+    # Accents (Strong Electric Blue & Neon Highlights)
     PRIMARY = "#0066FF"
-    PRIMARY_HOVER = "#0052CC"
+    PRIMARY_HOVER = "#1A75FF"
     SUCCESS = "#30D158"
     WARNING = "#FF9F0A"
     ERROR = "#FF453A"

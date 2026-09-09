@@ -51,8 +51,9 @@ class SettingsView(ctk.CTkScrollableFrame):
         auth_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
         )
         auth_card.pack(fill="x", padx=20, pady=10)
 
@@ -133,8 +134,9 @@ class SettingsView(ctk.CTkScrollableFrame):
         sys_card = ctk.CTkFrame(
             self,
             fg_color=Theme.BG_CARD,
-            corner_radius=8,
-            border_width=0,
+            corner_radius=10,
+            border_width=1,
+            border_color=Theme.BORDER,
         )
         sys_card.pack(fill="x", padx=20, pady=15)
 
