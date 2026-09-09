@@ -1,0 +1,7 @@
+watchdog>=6.0.0
+customtkinter>=6.0.0
+keyring>=25.7.0
+pystray>=0.19.5
+Pillow>=11.0.0
+pyinstaller>=6.22.0
+pytest>=8.0.0
