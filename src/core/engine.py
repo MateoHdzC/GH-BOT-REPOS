@@ -103,6 +103,7 @@ class Engine:
                     on_change_callback=pm.handle_filesystem_change,
                     path_filter=path_filter,
                 )
+                threading.Thread(target=pm.sync, daemon=True).start()
         else:
             pm.set_status(ProjectStatus.PAUSED)
 
@@ -209,8 +210,12 @@ class Engine:
             }
 
     def _maintenance_loop(self) -> None:
+        last_reconcile_time = 0.0
         while self._is_running:
             time.sleep(5)
+            now = time.time()
+
+            # 1. Process Retry Queue items
             due_items = self.retry_queue.get_due_items()
             for item in due_items:
                 pm = self.get_manager(item.project_path)
@@ -240,3 +245,31 @@ class Engine:
                             branch=item.branch,
                             error=res.stderr,
                         )
+
+            # 2. Continuous Periodic Reconciliation (every 20s)
+            if (now - last_reconcile_time) >= 20.0:
+                last_reconcile_time = now
+                managers = self.get_all_managers()
+                for pm in managers:
+                    if (
+                        pm.config.enabled
+                        and pm.config.mode in (ProjectMode.AUTO, ProjectMode.COMMIT_ONLY)
+                        and pm.status not in (ProjectStatus.PAUSED, ProjectStatus.SYNCING, ProjectStatus.ERROR)
+                        and not pm.debounce.is_pending
+                        and self.git.is_repo(pm.config.path)
+                    ):
+                        try:
+                            status = self.git.get_status(pm.config.path)
+                            has_unpushed = self.git.has_unpushed_commits(
+                                pm.config.path,
+                                remote=pm.config.remote or "origin",
+                                branch=pm.config.branch or "main",
+                            )
+                            if not status.is_clean or has_unpushed:
+                                log_event(
+                                    "AUTO_SYNC",
+                                    f"{pm.config.name}: Reconciliación periódica detectó cambios pendientes. Sincronizando...",
+                                )
+                                threading.Thread(target=pm.sync, daemon=True).start()
+                        except Exception as ex:
+                            log_event("ERROR", f"Error during reconciliation for {pm.config.name}: {ex}")

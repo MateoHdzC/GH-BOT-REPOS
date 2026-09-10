@@ -21,8 +21,8 @@ class DebounceController:
 
         self._lock = threading.Lock()
         self._timer: Optional[threading.Timer] = None
+        self._first_event_time: float = 0.0
         self._last_event_time: float = 0.0
-        self._is_active: bool = False
 
     @property
     def is_pending(self) -> bool:
@@ -40,7 +40,26 @@ class DebounceController:
 
     def notify_change(self) -> None:
         with self._lock:
-            self._last_event_time = time.time()
+            now = time.time()
+            if not self._first_event_time or not (self._timer and self._timer.is_alive()):
+                self._first_event_time = now
+
+            self._last_event_time = now
+
+            # Max delay prevents starvation if file changes keep arriving indefinitely
+            max_delay = max(float(self.debounce_seconds), float(self.debounce_seconds) * 1.5)
+            if (now - self._first_event_time) >= max_delay:
+                log_event(
+                    "WATCHER",
+                    f"{self.project_name}: Ventana máxima de debounce alcanzada ({int(now - self._first_event_time)}s). Ejecutando sincronización.",
+                )
+                if self._timer and self._timer.is_alive():
+                    self._timer.cancel()
+                self._timer = None
+                self._first_event_time = 0.0
+                threading.Thread(target=self._execute, daemon=True).start()
+                return
+
             if self._timer and self._timer.is_alive():
                 self._timer.cancel()
 
@@ -49,7 +68,7 @@ class DebounceController:
             self._timer.start()
             log_event(
                 "WATCHER",
-                f"{self.project_name}: Change registered. Debounce timer set to {self.debounce_seconds}s.",
+                f"{self.project_name}: Cambio registrado. Temporizador de debounce ajustado a {self.debounce_seconds}s.",
             )
 
     def trigger_now(self) -> None:
@@ -57,8 +76,9 @@ class DebounceController:
             if self._timer and self._timer.is_alive():
                 self._timer.cancel()
             self._timer = None
+            self._first_event_time = 0.0
 
-        log_event("WATCHER", f"{self.project_name}: Manual immediate trigger (⚡ Subir ahora).")
+        log_event("WATCHER", f"{self.project_name}: Sincronización manual inmediata (⚡ Subir ahora).")
         self._execute()
 
     def cancel(self) -> None:
@@ -66,6 +86,7 @@ class DebounceController:
             if self._timer and self._timer.is_alive():
                 self._timer.cancel()
             self._timer = None
+            self._first_event_time = 0.0
 
     def update_debounce_time(self, new_seconds: int) -> None:
         with self._lock:
@@ -74,6 +95,7 @@ class DebounceController:
     def _execute(self) -> None:
         with self._lock:
             self._timer = None
+            self._first_event_time = 0.0
 
         try:
             self.on_trigger()
