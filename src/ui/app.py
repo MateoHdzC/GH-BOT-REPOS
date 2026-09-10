@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 from pathlib import Path
 from tkinter import messagebox
 from typing import Dict, List, Optional
@@ -13,6 +14,7 @@ from src.config.manager import ConfigManager
 from src.config.models import ProjectConfig, ProjectMode, ProjectStatus
 from src.core.engine import Engine
 from src.core.project_manager import ProjectManager
+from src.core.safety_guard import SafetyCheckResult
 from src.core.startup import WindowsStartup
 from src.git.credentials import GitHubCredentials
 from src.ui.components.dashboard_view import DashboardView
@@ -67,6 +69,7 @@ class MainApplication(ctk.CTk):
         self.engine.start()
 
         self.engine.on_notify = self._dispatch_notification
+        self.engine.on_safety_confirmation = self._ask_safety_confirmation
 
         if os.name == "nt":
             self.after(50, self._apply_windows_glass_effects)
@@ -306,6 +309,45 @@ class MainApplication(ctk.CTk):
 
     def _dispatch_notification(self, level: str, title: str, message: str) -> None:
         WindowsNotifier.notify(title, message, level)
+
+    def _ask_safety_confirmation(self, project_name: str, safety_res: SafetyCheckResult) -> bool:
+        result_container = {"allow": False}
+        done_event = threading.Event()
+
+        def _show_dialog():
+            try:
+                self.show_window_from_tray()
+                if safety_res.dangerous_files:
+                    files_preview = "\n".join(f"  • {f}" for f in safety_res.dangerous_files[:6])
+                    if len(safety_res.dangerous_files) > 6:
+                        files_preview += f"\n  ...y {len(safety_res.dangerous_files) - 6} archivos más"
+                    msg = (
+                        f"El Safety Guard detectó archivos potencialmente sensibles o secretos en '{project_name}':\n\n"
+                        f"{files_preview}\n\n"
+                        f"¿Deseas subir realmente estos archivos a GitHub?"
+                    )
+                else:
+                    msg = (
+                        f"El Safety Guard detectó un cambio inusual en '{project_name}':\n\n"
+                        f"{safety_res.message}\n\n"
+                        f"¿Deseas confirmar y subir estos cambios a GitHub?"
+                    )
+                ans = messagebox.askyesno(
+                    title="Alerta de Seguridad — Safety Guard",
+                    message=msg,
+                    icon="warning",
+                    parent=self if self.winfo_exists() else None,
+                )
+                result_container["allow"] = bool(ans)
+            except Exception as ex:
+                log_event("ERROR", f"Error displaying safety confirmation dialog: {ex}")
+                result_container["allow"] = False
+            finally:
+                done_event.set()
+
+        self.after(0, _show_dialog)
+        done_event.wait(timeout=120)
+        return result_container["allow"]
 
     def on_close_to_tray(self) -> None:
         self.withdraw()

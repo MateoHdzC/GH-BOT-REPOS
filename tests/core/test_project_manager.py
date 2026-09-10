@@ -72,3 +72,50 @@ def test_sync_dry_run_mode(git_manager, sample_repo):
     assert status.is_clean is False
     assert len(pm.history) == 1
     assert "DRY RUN" in pm.history[0].status
+
+def test_sync_safety_guard_cancelled_by_user(git_manager, sample_repo):
+    config = ProjectConfig(
+        name="SafetyProject",
+        path=str(sample_repo),
+        mode=ProjectMode.COMMIT_ONLY,
+        safety_guard_enabled=True,
+    )
+    # User rejects upload
+    pm = ProjectManager(
+        config,
+        git_manager,
+        RetryQueue(),
+        on_safety_confirmation=lambda name, res: False,
+    )
+
+    (sample_repo / ".env").write_text("SECRET=12345", encoding="utf-8")
+    pm.sync()
+
+    assert pm.stats["commits"] == 0
+    assert pm.status == ProjectStatus.WATCHING
+    assert len(pm.history) == 1
+    assert "Subida cancelada por Safety Guard" in pm.history[0].status
+
+def test_sync_safety_guard_accepted_by_user(git_manager, sample_repo):
+    config = ProjectConfig(
+        name="SafetyProjectAllowed",
+        path=str(sample_repo),
+        mode=ProjectMode.COMMIT_ONLY,
+        safety_guard_enabled=True,
+    )
+    # User confirms upload
+    pm = ProjectManager(
+        config,
+        git_manager,
+        RetryQueue(),
+        on_safety_confirmation=lambda name, res: True,
+    )
+
+    (sample_repo / ".env").write_text("SECRET=12345", encoding="utf-8")
+    pm.sync()
+
+    assert pm.stats["commits"] == 1
+    assert pm.status == ProjectStatus.WATCHING
+    assert len(pm.history) == 2
+    assert "✓ Commit creado" in pm.history[0].status
+    assert "Safety Guard omitido" in pm.history[1].status

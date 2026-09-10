@@ -23,10 +23,12 @@ class Engine:
         config_manager: ConfigManager,
         on_status_change: Optional[Callable[[str, ProjectStatus], None]] = None,
         on_notify: Optional[Callable[[str, str, str], None]] = None,
+        on_safety_confirmation: Optional[Callable[[str, SafetyCheckResult], bool]] = None,
     ):
         self.config_manager = config_manager
         self.on_status_change = on_status_change
         self.on_notify = on_notify
+        self.on_safety_confirmation = on_safety_confirmation
 
         self.git = GitManager()
         self.watcher = WatcherService()
@@ -84,6 +86,7 @@ class Engine:
             retry_queue=self.retry_queue,
             on_status_change=self.on_status_change,
             on_notify=self.on_notify,
+            on_safety_confirmation=self.on_safety_confirmation,
         )
         self._managers[norm_path] = pm
 

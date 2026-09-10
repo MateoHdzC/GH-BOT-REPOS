@@ -31,12 +31,14 @@ class ProjectManager:
         retry_queue: RetryQueue,
         on_status_change: Optional[Callable[[str, ProjectStatus], None]] = None,
         on_notify: Optional[Callable[[str, str, str], None]] = None,
+        on_safety_confirmation: Optional[Callable[[str, SafetyCheckResult], bool]] = None,
     ):
         self.config = config
         self.git = git_manager
         self.retry_queue = retry_queue
         self.on_status_change = on_status_change
         self.on_notify = on_notify
+        self.on_safety_confirmation = on_safety_confirmation
 
         self.status = ProjectStatus.IDLE
         self.history: List[SyncHistoryEntry] = []
@@ -129,13 +131,21 @@ class ProjectManager:
             status = self.git.get_status(repo_path)
             safety_res = self.safety_guard.evaluate(status)
             if not safety_res.passed:
-                self.git.run_command(repo_path, ["reset", "HEAD"])
-                self.set_status(ProjectStatus.ERROR)
-                self.config.last_error = safety_res.message
-                if self.on_notify:
-                    self.on_notify("danger", self.config.name, safety_res.message)
-                self._add_history("⚠ Bloqueado por Safety Guard", safety_res.message)
-                return
+                user_approved = False
+                if self.on_safety_confirmation:
+                    user_approved = self.on_safety_confirmation(self.config.name, safety_res)
+
+                if not user_approved:
+                    self.git.run_command(repo_path, ["reset", "HEAD"])
+                    self.set_status(ProjectStatus.WATCHING)
+                    self.config.last_error = safety_res.message
+                    if self.on_notify:
+                        self.on_notify("warning", self.config.name, f"Subida cancelada: {safety_res.message}")
+                    self._add_history("⚠ Subida cancelada por Safety Guard", safety_res.message)
+                    return
+                else:
+                    log_event("SECURITY", f"{self.config.name}: Advertencia de Safety Guard omitida por confirmación del usuario.")
+                    self._add_history("⚠ Safety Guard omitido por usuario", safety_res.message)
 
             total_changed = status.total_changed_files if status.total_changed_files > 0 else 1
             commit_msg = f"auto: sync {total_changed} files [{now_str}]"

@@ -13,9 +13,9 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
-      "last_sync_time": null,
-      "last_commit_hash": null,
-      "last_commit_message": null,
+      "last_sync_time": "2026-09-09 22:09:40",
+      "last_commit_hash": "1cfedff",
+      "last_commit_message": "auto: sync 2 files [2026-09-09 22:09:40]",
       "last_error": null
     },
     {
@@ -49,10 +49,28 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
+      "last_sync_time": "2026-09-09 22:07:41",
+      "last_commit_hash": "9a3eac7",
+      "last_commit_message": "auto: sync 1 files [2026-09-09 22:07:41]",
+      "last_error": null
+    },
+    {
+      "name": "Code Review",
+      "path": "C:\\Users\\Mateo.Hdz\\Documents\\Code Review",
+      "remote": "https://github.com/MateoHdzC/AI-Code-Review",
+      "branch": "main",
+      "mode": "AUTO",
+      "debounce_seconds": 60,
+      "enabled": true,
+      "dry_run": false,
+      "safety_guard_enabled": true,
+      "max_changed_files_threshold": 50,
+      "max_deleted_lines_threshold": 500,
+      "custom_exclusions": [],
       "last_sync_time": null,
       "last_commit_hash": null,
       "last_commit_message": null,
-      "last_error": null
+      "last_error": "Potential secret or sensitive file detected: tests/fixtures/sample_repo/.env"
     }
   ],
   "start_with_windows": true,
