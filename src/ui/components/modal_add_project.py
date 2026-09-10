@@ -252,7 +252,7 @@ class ModalAddProject(ctk.CTkToplevel):
             width=100,
             corner_radius=6,
             border_width=0,
-            command=self.destroy,
+            command=self._on_cancel,
         )
         cancel_btn.pack(side="left")
 
@@ -270,6 +270,10 @@ class ModalAddProject(ctk.CTkToplevel):
             command=self._on_save,
         )
         save_btn.pack(side="right")
+
+    def _on_cancel(self) -> None:
+        self.grab_release()
+        self.destroy()
 
     def _add_label(self, parent, text: str) -> None:
         lbl = ctk.CTkLabel(
@@ -374,6 +378,7 @@ class ModalAddProject(ctk.CTkToplevel):
             )
 
             self.on_project_added(new_project)
+            self.grab_release()
             self.destroy()
         except Exception as ex:
             self.error_label.configure(text=f"Error al guardar proyecto: {ex}")

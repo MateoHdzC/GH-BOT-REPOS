@@ -35,6 +35,24 @@
       "last_commit_hash": null,
       "last_commit_message": null,
       "last_error": null
+    },
+    {
+      "name": "mysterious-noether",
+      "path": "C:\\Users\\Mateo.Hdz\\Documents\\antigravity\\mysterious-noether",
+      "remote": "https://github.com/MateoHdzC/openkey",
+      "branch": "main",
+      "mode": "AUTO",
+      "debounce_seconds": 300,
+      "enabled": true,
+      "dry_run": false,
+      "safety_guard_enabled": true,
+      "max_changed_files_threshold": 50,
+      "max_deleted_lines_threshold": 500,
+      "custom_exclusions": [],
+      "last_sync_time": null,
+      "last_commit_hash": null,
+      "last_commit_message": null,
+      "last_error": null
     }
   ],
   "start_with_windows": true,
