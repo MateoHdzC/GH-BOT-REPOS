@@ -281,7 +281,11 @@ class ModalAddProject(ctk.CTkToplevel):
         lbl.pack(anchor="w", pady=(8, 2))
 
     def _on_browse(self) -> None:
-        selected_dir = filedialog.askdirectory(title="Seleccionar carpeta del proyecto")
+        self.grab_release()
+        try:
+            selected_dir = filedialog.askdirectory(title="Seleccionar carpeta del proyecto", parent=self)
+        finally:
+            self.grab_set()
         if selected_dir:
             self.path_entry.delete(0, "end")
             self.path_entry.insert(0, selected_dir)
@@ -350,23 +354,26 @@ class ModalAddProject(ctk.CTkToplevel):
             )
             return
 
-        if remote_str:
-            self.git.set_or_add_remote(target_path, remote_str)
+        try:
+            if remote_str:
+                self.git.set_or_add_remote(target_path, remote_str)
 
-        debounce_secs = DEBOUNCE_OPTIONS.get(self.debounce_menu.get(), 300)
-        mode = ProjectMode(mode_str)
+            debounce_secs = DEBOUNCE_OPTIONS.get(self.debounce_menu.get(), 300)
+            mode = ProjectMode(mode_str)
 
-        new_project = ProjectConfig(
-            name=name_str,
-            path=str(target_path.resolve()),
-            remote=remote_str,
-            branch=branch_str,
-            mode=mode,
-            debounce_seconds=debounce_secs,
-            enabled=True,
-            dry_run=bool(self.dry_run_chk.get()),
-            safety_guard_enabled=bool(self.safety_chk.get()),
-        )
+            new_project = ProjectConfig(
+                name=name_str,
+                path=str(target_path.resolve()),
+                remote=remote_str,
+                branch=branch_str,
+                mode=mode,
+                debounce_seconds=debounce_secs,
+                enabled=True,
+                dry_run=bool(self.dry_run_chk.get()),
+                safety_guard_enabled=bool(self.safety_chk.get()),
+            )
 
-        self.on_project_added(new_project)
-        self.destroy()
+            self.on_project_added(new_project)
+            self.destroy()
+        except Exception as ex:
+            self.error_label.configure(text=f"Error al guardar proyecto: {ex}")

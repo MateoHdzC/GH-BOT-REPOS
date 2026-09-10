@@ -11,14 +11,29 @@ from typing import Optional
 from src.utils.logger import log_event
 
 _ACTIVE_TRAY_ICON = None
+_AUMID_REGISTERED = False
 
 def register_tray_icon(icon) -> None:
     global _ACTIVE_TRAY_ICON
     _ACTIVE_TRAY_ICON = icon
 
-def ensure_start_menu_shortcut() -> None:
-    if os.name != "nt":
+def ensure_windows_registration() -> None:
+    global _AUMID_REGISTERED
+    if _AUMID_REGISTERED or os.name != "nt":
         return
+    _AUMID_REGISTERED = True
+    try:
+        import winreg
+        base_dir = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent.parent.parent
+        ico_path = base_dir / "assets" / "icon.ico"
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\Classes\AppUserModelId\GH-BOT-REPOS")
+        winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, "GH-BOT-REPOS")
+        if ico_path.exists():
+            winreg.SetValueEx(key, "IconUri", 0, winreg.REG_SZ, str(ico_path))
+        winreg.CloseKey(key)
+    except Exception:
+        pass
+
     appdata = os.environ.get("APPDATA")
     if not appdata:
         return
@@ -53,7 +68,7 @@ class WindowsNotifier:
         full_title = f"{prefix}GH-BOT-REPOS — {title}"
 
         if os.name == "nt":
-            ensure_start_menu_shortcut()
+            ensure_windows_registration()
 
             base_dir = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent.parent.parent
             icon_candidate = base_dir / "assets" / "icon.ico"
@@ -72,25 +87,18 @@ class WindowsNotifier:
                 toast.show()
                 return
             except Exception as ex:
-                log_event("WARNING", f"winotify failed, falling back to powershell toast: {ex}")
+                log_event("WARNING", f"winotify failed with AUMID, trying powershell: {ex}")
 
             try:
-                esc_title = full_title.replace('"', '`"')
-                esc_msg = message.replace('"', '`"')
-                app_id = "{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe"
-                ps_script = f"""
-                [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
-                $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
-                $textNodes = $template.GetElementsByTagName('text')
-                $textNodes.Item(0).AppendChild($template.CreateTextNode("{esc_title}")) > $null
-                $textNodes.Item(1).AppendChild($template.CreateTextNode("{esc_msg}")) > $null
-                $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
-                [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("{app_id}").Show($toast)
-                """
-                subprocess.run(
-                    ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_script],
-                    creationflags=subprocess.CREATE_NO_WINDOW,
-                    timeout=5,
+                from winotify import Notification, audio
+                toast = Notification(
+                    app_id="{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe",
+                    title=full_title,
+                    msg=message,
                 )
+                sound = audio.Default if level == "success" else (audio.Hand if level in ("warning", "danger") else audio.Mail)
+                toast.set_audio(sound, loop=False)
+                toast.show()
+                return
             except Exception as ex:
                 log_event("ERROR", f"Failed to deliver Windows notification: {ex}")
