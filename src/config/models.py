@@ -62,6 +62,7 @@ class ProjectConfig:
     enabled: bool = True
     dry_run: bool = False
     safety_guard_enabled: bool = True
+    allow_sensitive_files: bool = False
     max_changed_files_threshold: int = 50
     max_deleted_lines_threshold: int = 500
     custom_exclusions: List[str] = field(default_factory=list)
@@ -94,6 +95,7 @@ class ProjectConfig:
             enabled=bool(data.get("enabled", True)),
             dry_run=bool(data.get("dry_run", False)),
             safety_guard_enabled=bool(data.get("safety_guard_enabled", True)),
+            allow_sensitive_files=bool(data.get("allow_sensitive_files", False)),
             max_changed_files_threshold=int(data.get("max_changed_files_threshold", 50)),
             max_deleted_lines_threshold=int(data.get("max_deleted_lines_threshold", 500)),
             custom_exclusions=list(data.get("custom_exclusions", [])),
