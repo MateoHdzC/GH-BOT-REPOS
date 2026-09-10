@@ -38,11 +38,27 @@ IGNORED_FILE_PATTERNS = {
     "*~",
 }
 
+SENSITIVE_FILE_PATTERNS = {
+    ".env*",
+    "*.pem",
+    "*.key",
+    "*.cert",
+    "*.crt",
+    "secrets*",
+    "credentials*",
+}
+
 class PathFilter:
 
-    def __init__(self, custom_exclusions: Optional[List[str]] = None):
+    def __init__(
+        self,
+        custom_exclusions: Optional[List[str]] = None,
+        allow_sensitive_files: bool = False,
+    ):
         self.ignored_dirs = set(IGNORED_DIR_NAMES)
         self.ignored_patterns = set(IGNORED_FILE_PATTERNS)
+        if allow_sensitive_files:
+            self.ignored_patterns -= SENSITIVE_FILE_PATTERNS
         if custom_exclusions:
             for item in custom_exclusions:
                 clean = item.strip().replace("\\", "/").rstrip("/")

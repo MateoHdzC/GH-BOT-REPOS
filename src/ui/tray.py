@@ -111,7 +111,14 @@ class SystemTrayManager:
 
     def update_menu(self) -> None:
         if self._tray_icon:
-            self._tray_icon.menu = self._create_menu()
+            threading.Thread(target=self._safe_update_menu, daemon=True).start()
+
+    def _safe_update_menu(self) -> None:
+        try:
+            if self._tray_icon:
+                self._tray_icon.menu = self._create_menu()
+        except Exception:
+            pass
 
     def stop(self) -> None:
         if self._tray_icon:

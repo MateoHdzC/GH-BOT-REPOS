@@ -19,6 +19,7 @@ class ProjectCard(ctk.CTkFrame):
         on_delete: Callable[[str], None],
         on_view_history: Callable[[ProjectManager], None],
         on_debounce_change: Optional[Callable[[str, int], None]] = None,
+        on_edit_settings: Optional[Callable[[ProjectManager], None]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -36,6 +37,7 @@ class ProjectCard(ctk.CTkFrame):
         self.on_delete = on_delete
         self.on_view_history = on_view_history
         self.on_debounce_change = on_debounce_change
+        self.on_edit_settings = on_edit_settings
 
         self._build_ui()
 
@@ -45,13 +47,13 @@ class ProjectCard(ctk.CTkFrame):
         header_frame = ctk.CTkFrame(self, fg_color=Theme.BG_CARD, corner_radius=0)
         header_frame.pack(fill="x", padx=18, pady=(15, 8))
 
-        name_label = ctk.CTkLabel(
+        self.name_label = ctk.CTkLabel(
             header_frame,
             text=cfg.name,
             font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=15, weight="bold"),
             text_color=Theme.TEXT_PRIMARY,
         )
-        name_label.pack(side="left")
+        self.name_label.pack(side="left")
 
         self.status_badge = ctk.CTkLabel(
             header_frame,
@@ -66,9 +68,9 @@ class ProjectCard(ctk.CTkFrame):
         grid_frame.columnconfigure(1, weight=1)
 
         self._add_field(grid_frame, 0, "Path:", cfg.path, is_path=True)
-        self._add_field(grid_frame, 1, "Branch:", cfg.branch or "main")
+        self.branch_val_lbl = self._add_field(grid_frame, 1, "Branch:", cfg.branch or "main")
         remote_display = cfg.remote if cfg.remote else "Sin remote configurado"
-        self._add_field(grid_frame, 2, "Remote:", remote_display)
+        self.remote_val_lbl = self._add_field(grid_frame, 2, "Remote:", remote_display)
         commit_display = cfg.last_commit_message or "Sin commits registrados"
         if cfg.last_commit_hash:
             commit_display = f"[{cfg.last_commit_hash}] {commit_display}"
@@ -162,6 +164,22 @@ class ProjectCard(ctk.CTkFrame):
         )
         del_btn.pack(side="right", padx=(5, 0))
 
+        config_btn = ctk.CTkButton(
+            action_frame,
+            text="⚙ Config",
+            fg_color=Theme.BTN_SECONDARY,
+            bg_color=Theme.BG_CARD,
+            hover_color=Theme.BTN_SECONDARY_HOVER,
+            text_color=Theme.TEXT_PRIMARY,
+            font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
+            width=70,
+            height=28,
+            corner_radius=6,
+            border_width=0,
+            command=lambda: self.on_edit_settings(self.manager) if self.on_edit_settings else None,
+        )
+        config_btn.pack(side="right", padx=5)
+
         history_btn = ctk.CTkButton(
             action_frame,
             text="Historial",
@@ -232,15 +250,20 @@ class ProjectCard(ctk.CTkFrame):
 
     def refresh(self) -> None:
         cfg = self.manager.config
+        self.name_label.configure(text=cfg.name)
         self.status_badge.configure(
             text=f"● {self.manager.status.value}",
             text_color=self._get_status_color(self.manager.status),
         )
+        self.branch_val_lbl.configure(text=cfg.branch or "main")
+        self.remote_val_lbl.configure(text=cfg.remote if cfg.remote else "Sin remote configurado")
         commit_display = cfg.last_commit_message or "Sin commits registrados"
         if cfg.last_commit_hash:
             commit_display = f"[{cfg.last_commit_hash}] {commit_display}"
         self.last_commit_lbl.configure(text=commit_display)
         self.last_sync_lbl.configure(text=cfg.last_sync_time or "Nunca")
+        if self.mode_selector.get() != cfg.mode.value:
+            self.mode_selector.set(cfg.mode.value)
 
     def _get_status_color(self, status: ProjectStatus) -> str:
         if status == ProjectStatus.WATCHING:

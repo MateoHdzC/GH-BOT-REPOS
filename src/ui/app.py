@@ -21,6 +21,7 @@ from src.ui.components.dashboard_view import DashboardView
 from src.ui.components.logs_view import LogsView
 from src.ui.components.modal_add_project import ModalAddProject
 from src.ui.components.modal_history import ModalProjectHistory
+from src.ui.components.modal_project_settings import ModalProjectSettings
 from src.ui.components.project_card import ProjectCard
 from src.ui.components.settings_view import SettingsView
 from src.ui.components.sidebar import Sidebar
@@ -196,10 +197,6 @@ class MainApplication(ctk.CTk):
             self.settings_view.pack(fill="both", expand=True)
 
     def _render_project_cards(self) -> None:
-        for widget in self.projects_scroll.winfo_children():
-            widget.destroy()
-        self._project_cards.clear()
-
         managers = self.engine.get_all_managers()
 
         if self._active_view_key == "activos":
@@ -208,6 +205,18 @@ class MainApplication(ctk.CTk):
             filtered = [m for m in managers if m.config.mode == ProjectMode.PAUSED or not m.config.enabled]
         else:
             filtered = managers
+
+        current_paths = [pm.config.path for pm in filtered]
+        existing_paths = list(self._project_cards.keys())
+
+        if current_paths == existing_paths and len(current_paths) > 0:
+            for card in self._project_cards.values():
+                card.refresh()
+            return
+
+        for widget in self.projects_scroll.winfo_children():
+            widget.destroy()
+        self._project_cards.clear()
 
         if not filtered:
             empty_box = ctk.CTkFrame(
@@ -238,9 +247,21 @@ class MainApplication(ctk.CTk):
                 on_delete=self._on_project_delete,
                 on_view_history=self._on_view_project_history,
                 on_debounce_change=self._on_project_debounce_change,
+                on_edit_settings=self._on_edit_project_settings,
             )
             card.pack(fill="x", pady=8)
             self._project_cards[pm.config.path] = card
+
+    def _on_edit_project_settings(self, manager: ProjectManager) -> None:
+        ModalProjectSettings(self, manager, on_settings_saved=self._on_project_settings_saved)
+
+    def _on_project_settings_saved(self, project: ProjectConfig) -> None:
+        self.config_manager.update_project(project)
+        self.engine.set_project_mode(project.path, project.mode)
+        self._render_project_cards()
+        self._update_sidebar_stats()
+        self.tray.update_menu()
+        WindowsNotifier.notify(project.name, "Ajustes del proyecto actualizados.", "success")
 
     def _open_add_project_modal(self) -> None:
         ModalAddProject(self, self.engine.git, on_project_added=self._on_project_added)

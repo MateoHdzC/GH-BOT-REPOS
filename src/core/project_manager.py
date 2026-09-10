@@ -55,6 +55,7 @@ class ProjectManager:
             enabled=config.safety_guard_enabled,
             max_changed_files=config.max_changed_files_threshold,
             max_deleted_lines=config.max_deleted_lines_threshold,
+            allow_sensitive_files=config.allow_sensitive_files,
         )
 
         self.debounce = DebounceController(

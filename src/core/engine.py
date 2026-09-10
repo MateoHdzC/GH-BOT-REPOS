@@ -93,7 +93,10 @@ class Engine:
         if project.enabled and project.mode != ProjectMode.PAUSED:
             pm.set_status(ProjectStatus.WATCHING)
             if self._is_running:
-                path_filter = PathFilter(project.custom_exclusions)
+                path_filter = PathFilter(
+                    custom_exclusions=project.custom_exclusions,
+                    allow_sensitive_files=project.allow_sensitive_files,
+                )
                 self.watcher.start_watching(
                     project_path=project.path,
                     project_name=project.name,
@@ -132,7 +135,10 @@ class Engine:
                         pm.set_status(ProjectStatus.PAUSED)
                     else:
                         pm.set_status(ProjectStatus.WATCHING)
-                        path_filter = PathFilter(pm.config.custom_exclusions)
+                        path_filter = PathFilter(
+                            custom_exclusions=pm.config.custom_exclusions,
+                            allow_sensitive_files=pm.config.allow_sensitive_files,
+                        )
                         self.watcher.start_watching(
                             project_path=pm.config.path,
                             project_name=pm.config.name,

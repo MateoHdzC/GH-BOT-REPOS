@@ -17,7 +17,8 @@ class ModalProjectHistory(ctk.CTkToplevel):
         self.resizable(False, False)
         self.configure(fg_color=Theme.BG_MAIN)
         self.transient(parent)
-        self.grab_set()
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self.after(50, lambda: self.grab_set() if self.winfo_exists() else None)
 
         self._build_ui()
 
@@ -106,6 +107,13 @@ class ModalProjectHistory(ctk.CTkToplevel):
             border_width=0,
             height=32,
             width=90,
-            command=self.destroy,
+            command=self._close,
         )
         close_btn.pack(side="right", padx=25, pady=(0, 15))
+
+    def _close(self) -> None:
+        try:
+            self.grab_release()
+        except Exception:
+            pass
+        self.destroy()

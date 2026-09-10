@@ -34,3 +34,14 @@ def test_path_filter_allows_normal_source_files():
     assert pf.should_ignore(base / "src" / "main.py", base) is False
     assert pf.should_ignore(base / "README.md", base) is False
     assert pf.should_ignore(base / "assets" / "style.css", base) is False
+
+def test_path_filter_allows_sensitive_files_when_enabled():
+    pf = PathFilter(allow_sensitive_files=True)
+    base = Path("C:/projects/demo")
+
+    assert pf.should_ignore(base / ".env", base) is False
+    assert pf.should_ignore(base / "certs" / "server.pem", base) is False
+    assert pf.should_ignore(base / "src" / "credentials.json", base) is False
+    # Normal ignored directories like .git and node_modules must still be ignored
+    assert pf.should_ignore(base / ".git" / "HEAD", base) is True
+    assert pf.should_ignore(base / "node_modules" / "pkg" / "index.js", base) is True

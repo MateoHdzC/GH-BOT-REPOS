@@ -34,36 +34,39 @@ class SafetyGuard:
         enabled: bool = True,
         max_changed_files: int = 50,
         max_deleted_lines: int = 500,
+        allow_sensitive_files: bool = False,
     ):
         self.enabled = enabled
         self.max_changed_files = max_changed_files
         self.max_deleted_lines = max_deleted_lines
+        self.allow_sensitive_files = allow_sensitive_files
 
     def evaluate(self, status: GitStatusInfo) -> SafetyCheckResult:
         if not self.enabled:
             return SafetyCheckResult(passed=True, message="Safety guard is disabled")
 
-        dangerous: List[str] = []
-        all_changed_files = status.staged_files + status.unstaged_files + status.untracked_files
+        if not self.allow_sensitive_files:
+            dangerous: List[str] = []
+            all_changed_files = status.staged_files + status.unstaged_files + status.untracked_files
 
-        for file_path in all_changed_files:
-            file_name = Path(file_path).name
-            for pat in DANGEROUS_FILE_PATTERNS:
-                if pat.match(file_name):
-                    dangerous.append(file_path)
-                    break
+            for file_path in all_changed_files:
+                file_name = Path(file_path).name
+                for pat in DANGEROUS_FILE_PATTERNS:
+                    if pat.match(file_name):
+                        dangerous.append(file_path)
+                        break
 
-        if dangerous:
-            msg = f"Potential secret or sensitive file detected: {', '.join(dangerous)}"
-            log_event("SECURITY", f"Commit blocked! {msg}")
-            return SafetyCheckResult(
-                passed=False,
-                warning=True,
-                message=msg,
-                files_count=status.total_changed_files,
-                deletions_count=status.deleted_lines_est,
-                dangerous_files=dangerous,
-            )
+            if dangerous:
+                msg = f"Potential secret or sensitive file detected: {', '.join(dangerous)}"
+                log_event("SECURITY", f"Commit blocked! {msg}")
+                return SafetyCheckResult(
+                    passed=False,
+                    warning=True,
+                    message=msg,
+                    files_count=status.total_changed_files,
+                    deletions_count=status.deleted_lines_est,
+                    dangerous_files=dangerous,
+                )
 
         is_large_files = status.total_changed_files > self.max_changed_files
         is_large_deletions = status.deleted_lines_est > self.max_deleted_lines

@@ -41,7 +41,8 @@ class ModalAddProject(ctk.CTkToplevel):
         self.resizable(False, False)
         self.configure(fg_color=Theme.BG_MAIN)
         self.transient(parent)
-        self.grab_set()
+        self.protocol("WM_DELETE_WINDOW", self._on_cancel)
+        self.after(50, lambda: self.grab_set() if self.winfo_exists() else None)
 
         self._build_ui()
 
@@ -220,6 +221,16 @@ class ModalAddProject(ctk.CTkToplevel):
         self.safety_chk.select()
         self.safety_chk.pack(anchor="w", padx=14, pady=(12, 6))
 
+        self.allow_sensitive_chk = ctk.CTkCheckBox(
+            options_frame,
+            text="Permitir archivos sensibles (.env, certificados, claves de prueba)",
+            text_color=Theme.TEXT_SECONDARY,
+            fg_color=Theme.PRIMARY,
+            bg_color=Theme.BG_CARD,
+            hover_color=Theme.PRIMARY_HOVER,
+        )
+        self.allow_sensitive_chk.pack(anchor="w", padx=14, pady=(6, 6))
+
         self.dry_run_chk = ctk.CTkCheckBox(
             options_frame,
             text="Modo DRY RUN (simula commits y pushes sin alterar Git ni GitHub)",
@@ -272,7 +283,10 @@ class ModalAddProject(ctk.CTkToplevel):
         save_btn.pack(side="right")
 
     def _on_cancel(self) -> None:
-        self.grab_release()
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         self.destroy()
 
     def _add_label(self, parent, text: str) -> None:
@@ -285,11 +299,14 @@ class ModalAddProject(ctk.CTkToplevel):
         lbl.pack(anchor="w", pady=(8, 2))
 
     def _on_browse(self) -> None:
-        self.grab_release()
+        try:
+            self.grab_release()
+        except Exception:
+            pass
         try:
             selected_dir = filedialog.askdirectory(title="Seleccionar carpeta del proyecto", parent=self)
         finally:
-            self.grab_set()
+            self.after(50, lambda: self.grab_set() if self.winfo_exists() else None)
         if selected_dir:
             self.path_entry.delete(0, "end")
             self.path_entry.insert(0, selected_dir)
@@ -375,10 +392,17 @@ class ModalAddProject(ctk.CTkToplevel):
                 enabled=True,
                 dry_run=bool(self.dry_run_chk.get()),
                 safety_guard_enabled=bool(self.safety_chk.get()),
+                allow_sensitive_files=bool(self.allow_sensitive_chk.get()),
             )
 
-            self.on_project_added(new_project)
-            self.grab_release()
+            parent_widget = self.master
+            try:
+                self.grab_release()
+            except Exception:
+                pass
             self.destroy()
+
+            if self.on_project_added and parent_widget:
+                parent_widget.after(10, lambda: self.on_project_added(new_project))
         except Exception as ex:
             self.error_label.configure(text=f"Error al guardar proyecto: {ex}")

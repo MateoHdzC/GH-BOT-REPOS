@@ -61,3 +61,17 @@ def test_safety_guard_blocks_excessive_changes():
     )
     res_del = sg.evaluate(status_too_many_deletions)
     assert res_del.passed is False
+
+def test_safety_guard_allows_sensitive_files_when_configured():
+    sg = SafetyGuard(enabled=True, allow_sensitive_files=True)
+
+    status_with_env = GitStatusInfo(
+        is_clean=False,
+        staged_files=[".env", "config/credentials.json"],
+        unstaged_files=[],
+        untracked_files=[],
+        total_changed_files=2,
+    )
+    res = sg.evaluate(status_with_env)
+    assert res.passed is True
+    assert len(res.dangerous_files) == 0
