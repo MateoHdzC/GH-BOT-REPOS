@@ -18,6 +18,7 @@ class ProjectCard(ctk.CTkFrame):
         on_sync_now: Callable[[str], None],
         on_delete: Callable[[str], None],
         on_view_history: Callable[[ProjectManager], None],
+        on_debounce_change: Optional[Callable[[str, int], None]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -34,6 +35,7 @@ class ProjectCard(ctk.CTkFrame):
         self.on_sync_now = on_sync_now
         self.on_delete = on_delete
         self.on_view_history = on_view_history
+        self.on_debounce_change = on_debounce_change
 
         self._build_ui()
 
@@ -102,6 +104,47 @@ class ProjectCard(ctk.CTkFrame):
         )
         self.mode_selector.set(cfg.mode.value)
         self.mode_selector.pack(side="left", padx=5)
+
+        wait_label = ctk.CTkLabel(
+            action_frame,
+            text="Espera:",
+            font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=12),
+            text_color=Theme.TEXT_SECONDARY,
+        )
+        wait_label.pack(side="left", padx=(12, 6))
+
+        self._debounce_options = {
+            "1 min": 60,
+            "2 min": 120,
+            "5 min": 300,
+            "10 min": 600,
+            "30 min": 1800,
+            "1 hora": 3600,
+        }
+        current_debounce_label = "5 min"
+        for label, val in self._debounce_options.items():
+            if val == cfg.debounce_seconds:
+                current_debounce_label = label
+                break
+
+        self.debounce_menu = ctk.CTkOptionMenu(
+            action_frame,
+            values=list(self._debounce_options.keys()),
+            command=self._on_debounce_selected,
+            font=ctk.CTkFont(family=Theme.FONT_FAMILY, size=11),
+            fg_color=Theme.BG_INPUT,
+            button_color=Theme.BG_CARD_HOVER,
+            button_hover_color=Theme.PRIMARY,
+            text_color=Theme.TEXT_PRIMARY,
+            dropdown_fg_color=Theme.BG_CARD,
+            dropdown_hover_color=Theme.PRIMARY,
+            dropdown_text_color=Theme.TEXT_PRIMARY,
+            width=85,
+            height=28,
+            corner_radius=6,
+        )
+        self.debounce_menu.set(current_debounce_label)
+        self.debounce_menu.pack(side="left", padx=5)
 
         del_btn = ctk.CTkButton(
             action_frame,
@@ -181,6 +224,11 @@ class ProjectCard(ctk.CTkFrame):
             self.on_mode_change(self.manager.config.path, mode)
         except ValueError:
             pass
+
+    def _on_debounce_selected(self, choice: str) -> None:
+        secs = self._debounce_options.get(choice, 300)
+        if self.on_debounce_change:
+            self.on_debounce_change(self.manager.config.path, secs)
 
     def refresh(self) -> None:
         cfg = self.manager.config

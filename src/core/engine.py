@@ -139,6 +139,16 @@ class Engine:
                 return True
             return False
 
+    def set_project_debounce(self, path: str, seconds: int) -> bool:
+        with self._lock:
+            norm = str(Path(path).resolve())
+            pm = self._managers.get(norm)
+            if pm:
+                pm.config.debounce_seconds = seconds
+                pm.debounce.debounce_seconds = seconds
+                return self.config_manager.update_project(pm.config)
+            return False
+
     def get_manager(self, path: str) -> Optional[ProjectManager]:
         with self._lock:
             return self._managers.get(str(Path(path).resolve()))

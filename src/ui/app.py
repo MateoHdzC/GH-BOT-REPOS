@@ -234,6 +234,7 @@ class MainApplication(ctk.CTk):
                 on_sync_now=self._on_project_sync_now,
                 on_delete=self._on_project_delete,
                 on_view_history=self._on_view_project_history,
+                on_debounce_change=self._on_project_debounce_change,
             )
             card.pack(fill="x", pady=8)
             self._project_cards[pm.config.path] = card
@@ -253,6 +254,9 @@ class MainApplication(ctk.CTk):
         self._render_project_cards()
         self._update_sidebar_stats()
         self.tray.update_menu()
+
+    def _on_project_debounce_change(self, path: str, seconds: int) -> None:
+        self.engine.set_project_debounce(path, seconds)
 
     def _on_project_sync_now(self, path: str) -> None:
         self.engine.sync_project_now(path)
