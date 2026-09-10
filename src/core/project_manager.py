@@ -47,6 +47,7 @@ class ProjectManager:
             "files_changed": 0,
         }
 
+        self._is_manual_sync = False
         self._op_lock = threading.Lock()
         self.safety_guard = SafetyGuard(
             enabled=config.safety_guard_enabled,
@@ -76,6 +77,7 @@ class ProjectManager:
         self.sync()
 
     def sync_now(self) -> None:
+        self._is_manual_sync = True
         self.debounce.trigger_now()
 
     def sync(self, dry_run: Optional[bool] = None) -> None:
@@ -89,6 +91,8 @@ class ProjectManager:
             self._op_lock.release()
 
     def _do_sync(self, dry_run: Optional[bool] = None) -> None:
+        is_manual = getattr(self, "_is_manual_sync", False)
+        self._is_manual_sync = False
         repo_path = self.config.path
         is_dry_run = dry_run if dry_run is not None else self.config.dry_run
 
@@ -96,68 +100,92 @@ class ProjectManager:
             self.set_status(ProjectStatus.ERROR)
             self.config.last_error = "Directory is not a Git repository"
             log_event("ERROR", f"{self.config.name}: Not a Git repo at {repo_path}")
+            if is_manual and self.on_notify:
+                self.on_notify("danger", self.config.name, "La ruta no es un repositorio Git válido.")
             return
 
         self.set_status(ProjectStatus.SYNCING)
 
         status = self.git.get_status(repo_path)
-        if status.is_clean:
+        has_unpushed = self.git.has_unpushed_commits(
+            repo_path,
+            remote=self.config.remote or "origin",
+            branch=self.config.branch or "main",
+        )
+
+        if status.is_clean and not has_unpushed:
             log_event("GIT", f"{self.config.name}: No hay cambios para sincronizar.")
             self.set_status(ProjectStatus.WATCHING)
-            return
-
-        log_event(
-            "GIT",
-            f"{self.config.name}: Changes detected ({status.total_changed_files} files changed).",
-        )
-        self.stats["files_changed"] += status.total_changed_files
-
-        safety_res = self.safety_guard.evaluate(status)
-        if not safety_res.passed:
-            self.set_status(ProjectStatus.ERROR)
-            self.config.last_error = safety_res.message
-            if self.on_notify:
-                self.on_notify("danger", self.config.name, safety_res.message)
-            self._add_history("⚠ Bloqueado por Safety Guard", safety_res.message)
-            return
-
-        if is_dry_run:
-            log_event("SYSTEM", f"[DRY RUN] {self.config.name}: Would stage {status.total_changed_files} files, commit and push.")
-            self._add_history("🔍 DRY RUN", f"Simulados {status.total_changed_files} cambios")
-            self.set_status(ProjectStatus.WATCHING)
-            return
-
-        stage_res = self.git.stage_all(repo_path)
-        if not stage_res.success:
-            self.set_status(ProjectStatus.ERROR)
-            self.config.last_error = f"Stage error: {stage_res.stderr}"
-            self._add_history("❌ Error al preparar cambios", stage_res.stderr)
+            if is_manual and self.on_notify:
+                self.on_notify("info", self.config.name, "Repositorio al día. No hay cambios pendientes por subir.")
             return
 
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        commit_msg = f"auto: sync {status.total_changed_files} files [{now_str}]"
-        commit_res = self.git.commit(repo_path, commit_msg)
-        if not commit_res.success:
-            self.set_status(ProjectStatus.ERROR)
-            self.config.last_error = f"Commit error: {commit_res.stderr}"
-            self._add_history("❌ Error al crear commit", commit_res.stderr)
-            return
 
-        last_commit = self.git.get_last_commit(repo_path)
-        commit_hash = last_commit.short_hash if last_commit else "unknown"
-        self.stats["commits"] += 1
-        self.config.last_commit_hash = commit_hash
-        self.config.last_commit_message = commit_msg
-        self.config.last_sync_time = now_str
-        log_event("COMMIT", f"{self.config.name}: Commit created [{commit_hash}]")
+        if not status.is_clean:
+            log_event(
+                "GIT",
+                f"{self.config.name}: Changes detected ({status.total_changed_files} files changed).",
+            )
+            self.stats["files_changed"] += status.total_changed_files
 
-        if self.config.mode == ProjectMode.COMMIT_ONLY:
-            log_event("PROJECT", f"{self.config.name}: Mode is COMMIT_ONLY, push skipped.")
-            self._add_history("✓ Commit creado", commit_msg, commit_hash)
-            self.set_status(ProjectStatus.WATCHING)
-            if self.on_notify:
-                self.on_notify("success", self.config.name, "Commit creado correctamente.")
-            return
+            safety_res = self.safety_guard.evaluate(status)
+            if not safety_res.passed:
+                self.set_status(ProjectStatus.ERROR)
+                self.config.last_error = safety_res.message
+                if self.on_notify:
+                    self.on_notify("danger", self.config.name, safety_res.message)
+                self._add_history("⚠ Bloqueado por Safety Guard", safety_res.message)
+                return
+
+            if is_dry_run:
+                log_event("SYSTEM", f"[DRY RUN] {self.config.name}: Would stage {status.total_changed_files} files, commit and push.")
+                self._add_history("🔍 DRY RUN", f"Simulados {status.total_changed_files} cambios")
+                self.set_status(ProjectStatus.WATCHING)
+                return
+
+            stage_res = self.git.stage_all(repo_path)
+            if not stage_res.success:
+                self.set_status(ProjectStatus.ERROR)
+                self.config.last_error = f"Stage error: {stage_res.stderr}"
+                self._add_history("❌ Error al preparar cambios", stage_res.stderr)
+                if self.on_notify:
+                    self.on_notify("danger", self.config.name, f"Error preparando archivos: {stage_res.stderr}")
+                return
+
+            commit_msg = f"auto: sync {status.total_changed_files} files [{now_str}]"
+            commit_res = self.git.commit(repo_path, commit_msg)
+            if not commit_res.success:
+                self.set_status(ProjectStatus.ERROR)
+                self.config.last_error = f"Commit error: {commit_res.stderr}"
+                self._add_history("❌ Error al crear commit", commit_res.stderr)
+                if self.on_notify:
+                    self.on_notify("danger", self.config.name, f"Error al crear commit: {commit_res.stderr}")
+                return
+
+            last_commit = self.git.get_last_commit(repo_path)
+            commit_hash = last_commit.short_hash if last_commit else "unknown"
+            self.stats["commits"] += 1
+            self.config.last_commit_hash = commit_hash
+            self.config.last_commit_message = commit_msg
+            self.config.last_sync_time = now_str
+            log_event("COMMIT", f"{self.config.name}: Commit created [{commit_hash}]")
+
+            if self.config.mode == ProjectMode.COMMIT_ONLY:
+                log_event("PROJECT", f"{self.config.name}: Mode is COMMIT_ONLY, push skipped.")
+                self._add_history("✓ Commit creado", commit_msg, commit_hash)
+                self.set_status(ProjectStatus.WATCHING)
+                if self.on_notify:
+                    self.on_notify("success", self.config.name, "Commit creado correctamente.")
+                return
+        else:
+            last_commit = self.git.get_last_commit(repo_path)
+            commit_hash = last_commit.short_hash if last_commit else "HEAD"
+            commit_msg = last_commit.message if last_commit else "Commits pendientes"
+            self.config.last_commit_hash = commit_hash
+            self.config.last_commit_message = commit_msg
+            self.config.last_sync_time = now_str
+            log_event("GIT", f"{self.config.name}: Subiendo commits locales pendientes [{commit_hash}]...")
 
         token = GitHubCredentials.get_token()
         remote = self.config.remote or "origin"

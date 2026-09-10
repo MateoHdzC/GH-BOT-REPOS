@@ -246,6 +246,28 @@ class GitManager:
             deleted_lines_est=deleted_lines,
         )
 
+    def has_unpushed_commits(
+        self,
+        path: Path | str,
+        remote: str = "origin",
+        branch: Optional[str] = None,
+    ) -> bool:
+        if not self.get_remote_url(path, remote):
+            return False
+        if not branch:
+            branch = self.get_current_branch(path)
+        status_res = self.run_command(path, ["status", "--porcelain=v1", "-b"])
+        if status_res.success and status_res.stdout:
+            first_line = status_res.stdout.splitlines()[0] if status_res.stdout.splitlines() else ""
+            if "ahead" in first_line:
+                return True
+        rev_remote = self.run_command(path, ["rev-parse", "--verify", f"{remote}/{branch}"])
+        if not rev_remote.success:
+            rev_local = self.run_command(path, ["rev-parse", "--verify", "HEAD"])
+            return rev_local.success
+        log_res = self.run_command(path, ["log", f"{remote}/{branch}..HEAD", "--oneline"])
+        return log_res.success and bool(log_res.stdout.strip())
+
     def stage_all(self, path: Path | str) -> GitResult:
         return self.run_command(path, ["add", "-A"])
 

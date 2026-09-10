@@ -32,6 +32,7 @@ def build():
         "--hidden-import=watchdog",
         "--hidden-import=watchdog.observers",
         "--hidden-import=watchdog.observers.read_directory_changes",
+        "--hidden-import=winotify",
         "main.py",
     ]
 
