@@ -171,6 +171,25 @@ class ProjectManager:
             auth_token=token,
         )
 
+        if not push_res.success:
+            err_lower = push_res.stderr.lower()
+            if (
+                push_res.error_kind == GitErrorKind.REJECTED_NON_FAST_FORWARD
+                or "fetch first" in err_lower
+                or "non-fast-forward" in err_lower
+            ):
+                log_event("GIT", f"{self.config.name}: Remote is ahead, reconciling with pull --rebase...")
+                pull_res = self.git.pull_rebase(repo_path, remote=remote, branch=branch, auth_token=token)
+                if pull_res.success:
+                    log_event("GIT", f"{self.config.name}: Rebase successful, retrying push...")
+                    push_res = self.git.push(
+                        repo_path,
+                        remote=remote,
+                        branch=branch,
+                        set_upstream=True,
+                        auth_token=token,
+                    )
+
         if push_res.success:
             self.stats["pushes"] += 1
             self.retry_queue.remove(self.config.path)

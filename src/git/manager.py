@@ -90,6 +90,7 @@ class GitManager:
         cmd = [self.git_binary] + args
         cmd_env = os.environ.copy()
         cmd_env["GIT_TERMINAL_PROMPT"] = "0"
+        cmd_env["GCM_INTERACTIVE"] = "never"
         if env:
             cmd_env.update(env)
 
@@ -273,9 +274,37 @@ class GitManager:
 
         env = {}
         if auth_token:
+            import base64
+            auth_b64 = base64.b64encode(f"x-access-token:{auth_token}".encode("ascii")).decode("ascii")
             args = [
                 "-c",
-                f"http.extraHeader=Authorization: Bearer {auth_token}",
+                "credential.helper=",
+                "-c",
+                f"http.extraHeader=Authorization: Basic {auth_b64}",
+            ] + args
+
+        return self.run_command(path, args, timeout=60, env=env)
+
+    def pull_rebase(
+        self,
+        path: Path | str,
+        remote: str = "origin",
+        branch: Optional[str] = None,
+        auth_token: Optional[str] = None,
+    ) -> GitResult:
+        if not branch:
+            branch = self.get_current_branch(path)
+
+        args = ["pull", "--rebase", remote, branch]
+        env = {}
+        if auth_token:
+            import base64
+            auth_b64 = base64.b64encode(f"x-access-token:{auth_token}".encode("ascii")).decode("ascii")
+            args = [
+                "-c",
+                "credential.helper=",
+                "-c",
+                f"http.extraHeader=Authorization: Basic {auth_b64}",
             ] + args
 
         return self.run_command(path, args, timeout=60, env=env)
