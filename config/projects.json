@@ -14,9 +14,9 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
-      "last_sync_time": "2026-09-09 23:13:36",
-      "last_commit_hash": "5b1ff4f",
-      "last_commit_message": "auto: sync 5 files [2026-09-09 23:13:36]",
+      "last_sync_time": "2026-09-09 23:25:50",
+      "last_commit_hash": "f6574b2",
+      "last_commit_message": "auto: sync 13 files [2026-09-09 23:25:50]",
       "last_error": null
     },
     {
@@ -44,7 +44,7 @@
       "remote": "https://github.com/MateoHdzC/openkey",
       "branch": "main",
       "mode": "AUTO",
-      "debounce_seconds": 300,
+      "debounce_seconds": 60,
       "enabled": true,
       "dry_run": false,
       "safety_guard_enabled": true,
@@ -71,10 +71,10 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
-      "last_sync_time": null,
-      "last_commit_hash": null,
-      "last_commit_message": null,
-      "last_error": "Potential secret or sensitive file detected: tests/fixtures/sample_repo/.env"
+      "last_sync_time": "2026-09-09 23:25:54",
+      "last_commit_hash": "32dae8c",
+      "last_commit_message": "auto: sync 20 files [2026-09-09 23:25:54]",
+      "last_error": null
     }
   ],
   "start_with_windows": true,
