@@ -271,6 +271,10 @@ class GitManager:
     def stage_all(self, path: Path | str) -> GitResult:
         return self.run_command(path, ["add", "-A"])
 
+    def has_staged_changes(self, path: Path | str) -> bool:
+        res = self.run_command(path, ["diff", "--cached", "--quiet"])
+        return res.returncode == 1
+
     def commit(self, path: Path | str, message: str) -> GitResult:
         clean_msg = message.strip()
         if not clean_msg:

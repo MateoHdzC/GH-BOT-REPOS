@@ -35,14 +35,13 @@ class ProjectEventHandler(FileSystemEventHandler):
         self.filter = path_filter
 
     def _process_event(self, event_type: str, src_path: str, dest_path: Optional[str] = None) -> None:
-        if self.filter.should_ignore(src_path, self.project_dir):
-            return
-        if dest_path and self.filter.should_ignore(dest_path, self.project_dir):
+        target_path = dest_path if (event_type == "MOVED" and dest_path) else src_path
+        if self.filter.should_ignore(target_path, self.project_dir):
             return
 
-        rel_path = os.path.relpath(src_path, self.project_dir)
+        rel_path = os.path.relpath(target_path, self.project_dir)
         log_event("WATCHER", f"{self.project_name}: {event_type} on {rel_path}")
-        self.on_change(event_type, src_path)
+        self.on_change(event_type, target_path)
 
     def on_created(self, event: FileSystemEvent) -> None:
         if not event.is_directory:

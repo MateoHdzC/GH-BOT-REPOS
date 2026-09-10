@@ -7,12 +7,50 @@ from typing import List, Optional
 
 from src.config.models import DEFAULT_EXCLUSIONS
 
+IGNORED_DIR_NAMES = {
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    "node_modules",
+    "logs",
+    ".pytest_cache",
+    ".tox",
+    ".nox",
+    "build",
+    "dist",
+}
+
+IGNORED_FILE_PATTERNS = {
+    ".DS_Store",
+    ".env*",
+    "*.pem",
+    "*.key",
+    "*.cert",
+    "*.crt",
+    "secrets*",
+    "credentials*",
+    "*.pyc",
+    "*.pyo",
+    "*.swp",
+    "*.swo",
+    "*~",
+}
+
 class PathFilter:
 
     def __init__(self, custom_exclusions: Optional[List[str]] = None):
-        self.exclusions = list(DEFAULT_EXCLUSIONS)
+        self.ignored_dirs = set(IGNORED_DIR_NAMES)
+        self.ignored_patterns = set(IGNORED_FILE_PATTERNS)
         if custom_exclusions:
-            self.exclusions.extend(custom_exclusions)
+            for item in custom_exclusions:
+                clean = item.strip().replace("\\", "/").rstrip("/")
+                if "/" in clean:
+                    self.ignored_patterns.add(clean)
+                else:
+                    self.ignored_dirs.add(clean)
+                    self.ignored_patterns.add(clean)
 
     def should_ignore(self, path: Path | str, base_dir: Optional[Path | str] = None) -> bool:
         target = Path(path).resolve()
@@ -24,21 +62,16 @@ class PathFilter:
         else:
             rel_path = target
 
-        posix_rel = rel_path.as_posix()
-        name = target.name
-
-        parts = rel_path.parts
-        if ".git" in parts or any(p.startswith(".git") for p in parts):
+        parts = set(rel_path.parts)
+        if any(d in parts for d in self.ignored_dirs):
             return True
 
-        for pattern in self.exclusions:
-            clean_pat = pattern.replace("\\", "/").rstrip("/")
-            if fnmatch.fnmatch(name, pattern) or fnmatch.fnmatch(posix_rel, pattern):
+        filename = target.name
+        if filename in self.ignored_patterns:
+            return True
+
+        for pat in self.ignored_patterns:
+            if fnmatch.fnmatch(filename, pat) or fnmatch.fnmatch(rel_path.as_posix(), pat):
                 return True
-            if fnmatch.fnmatch(name, clean_pat) or fnmatch.fnmatch(posix_rel, clean_pat):
-                return True
-            for part in parts:
-                if fnmatch.fnmatch(part, clean_pat):
-                    return True
 
         return False

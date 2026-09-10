@@ -19,7 +19,7 @@ class WindowsStartup:
             exe_path = sys.executable
             return f'"{exe_path}" --tray'
         else:
-            python_exe = sys.executable
+            python_exe = sys.executable.replace("python.exe", "pythonw.exe")
             main_script = Path(__file__).resolve().parent.parent.parent / "main.py"
             return f'"{python_exe}" "{main_script}" --tray'
 
