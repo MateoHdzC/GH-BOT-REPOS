@@ -14,9 +14,9 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
-      "last_sync_time": "2026-09-09 23:25:50",
-      "last_commit_hash": "f6574b2",
-      "last_commit_message": "auto: sync 13 files [2026-09-09 23:25:50]",
+      "last_sync_time": "2026-09-10 22:56:38",
+      "last_commit_hash": "9666308",
+      "last_commit_message": "auto: sync 1 files [2026-09-10 22:56:38]",
       "last_error": null
     },
     {
@@ -79,7 +79,7 @@
     {
       "name": "News-Portal",
       "path": "C:\\Users\\Mateo.Hdz\\Documents\\webs\\News-Portal",
-      "remote": "",
+      "remote": "https://github.com/MateoHdzC/News-Portal",
       "branch": "main",
       "mode": "AUTO",
       "debounce_seconds": 60,
@@ -90,9 +90,9 @@
       "max_changed_files_threshold": 50,
       "max_deleted_lines_threshold": 500,
       "custom_exclusions": [],
-      "last_sync_time": "2026-09-10 22:46:33",
-      "last_commit_hash": "7f06f8a",
-      "last_commit_message": "auto: sync 17 files [2026-09-10 22:46:33]",
+      "last_sync_time": "2026-09-10 23:06:05",
+      "last_commit_hash": "ea94090",
+      "last_commit_message": "auto: sync 4 files [2026-09-10 23:06:05]",
       "last_error": null
     }
   ],
